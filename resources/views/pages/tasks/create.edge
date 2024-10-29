@@ -1,0 +1,55 @@
+{{--  @layout({title :'Create-Task'})   --}}
+
+
+
+<head>
+    <!-- Include Vite for CSS and JS -->
+    @vite(['resources/css/createTask.css'])
+</head>
+{{--  <div class="task-page-container">
+    <!-- Left: Heading -->
+    <div class="heading-container">
+        <h2 class="heading-primary">Create a New Task</h2>
+    </div>
+
+    <!-- Right: Form -->
+    <div class="form-container">
+        <form method="POST" action="{{ route('task.tasks.store') }}" class="task-form">
+            {{ csrfField() }}
+            <div class="form-group">
+                <label for="title">Task Title</label>
+                <input type="text" id="title" name="title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Task Description</label>
+                <textarea id="description" name="description" class="form-control" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Task</button>
+        </form>
+    </div>
+</div>
+
+@end  --}}
+
+@extends('layouts.main')
+
+@section('content')
+    <h2>Create New Task for {{ project.title }}</h2>
+
+    <form action="{{ route('tasks.store') }}" method="POST">
+        {{ csrfField() }}
+        <input type="hidden" name="projectId" value="{{ project.id }}">
+
+        <div class="form-group">
+            <label for="title">Task Title</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Task Description</label>
+            <textarea id="description" name="description" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Task</button>
+    </form>
+@endsection

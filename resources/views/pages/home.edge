@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title || '' }} Dashboard - AdonisJS v6</title>
+
+    <!-- Include Vite for CSS and JS -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Favicon (Optional) -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Main Heading -->
+        <h1>Welcome to AdonisJS Dashboard</h1>
+
+        @if (auth.user)
+        <h2>Hello, {{ auth.user.fullName }}</h2>
+
+        <!-- Logout Form -->
+        <form method="post" action="{{ route('auth.logout') }}" class="logout-form">
+            {{ csrfField() }}
+            <button type="submit" class="btn btn-logout">Logout</button>
+        </form>
+
+        <!-- Link to Tasks -->
+        <a href="{{ route('projects.index') }}" class="btn btn-primary">View Projects</a>
+
+        @else
+        <!-- Login and Register Links -->
+        <a href="{{ route('auth.register.show') }}" class="btn btn-primary">Register</a>
+        <a href="{{ route('auth.login.show') }}" class="btn btn-secondary">Login</a>
+        @endif
+    </div>
+</body>
+
+</html>

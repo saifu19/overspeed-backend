@@ -1,0 +1,97 @@
+/* Task List Styles */
+.task-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.task-item {
+    background-color: #f0f8ff;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.task-item h3 {
+    font-size: 1.5rem;
+    color: #4682b4;
+    margin-bottom: 0.5rem;
+}
+
+.task-item p {
+    font-size: 1rem;
+    color: #333;
+}
+
+.no-tasks {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #ff4500;
+    background-color: #fff3f3;
+}
+
+/* Task Action Buttons */
+.task-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.task-actions .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+/* Buttons */
+button, a.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #4682b4;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #5a9bd4;
+}
+
+.btn-secondary {
+    background-color: #ff7f50;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #ff9966;
+}
+
+/* Task Action Buttons Container */
+.task-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+/* Primary Heading (h2) Styling */
+.heading-primary {
+    font-size: 2.5rem;
+    color: #333;
+    background: linear-gradient(135deg, #4682b4 0%, #ff7f50 100%);
+    background-clip: text; /* Standard property */
+    -webkit-background-clip: text; /* WebKit-specific prefix for older browsers */
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}

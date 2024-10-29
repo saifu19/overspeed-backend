@@ -1,0 +1,39 @@
+@layout({title :'Login'}) 
+    
+
+
+  <div class="wrapper">
+    <div class="title"><span>Login</span></div>
+
+    
+    <form method="post" action="{{ route('auth.login.store') }}">
+
+      
+      {{ csrfField() }}
+
+      @if (session.has('error'))
+  <div class="alert alert-danger">
+    {{ session.get('error') }}
+  </div>
+@endif
+
+      <div class="row">
+        <i class="fas fa-user"></i>
+        <input type="text" name="email" placeholder="Email" required />
+      </div>
+      <div class="row">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="password" placeholder="Password" required />
+      </div>
+      <div class="pass"><a href="#">Forgot password?</a></div>
+      <div class="row button">
+        <input type="submit" value="Login" />
+      </div>
+      <div class="signup-link">Not a member? <a href="{{ route('auth.register.show') }}">Signup</a></div>
+    </form>
+
+  </div>
+
+
+
+@end

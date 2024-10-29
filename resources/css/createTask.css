@@ -1,0 +1,127 @@
+/* General Form Styles */
+.task-form {
+    max-width: 500px;
+    margin: 2rem auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Group for Consistent Spacing */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* Label Styling */
+label {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Input and Textarea Styling */
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #4682b4;
+    outline: none;
+    background-color: #fff;
+}
+
+/* Textarea Specific Styling */
+textarea.form-control {
+    height: 150px;
+    resize: vertical;
+}
+
+/* Submit Button */
+button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    background-color: #4682b4;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #5a9bd4;
+}
+
+
+
+
+
+/* Container for Flexbox Layout */
+.task-page-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh; /* Full page height */
+    padding: 0 2rem;
+    background: linear-gradient(135deg, #fcb69f 0%, #9ad3bc 100%);
+}
+
+/* Left Section: Heading */
+.heading-container {
+    flex: 1;
+    text-align: left;
+    padding-right: 2rem;
+}
+
+/* Right Section: Form */
+.form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/* Task Form Adjustments */
+.task-form {
+    max-width: 400px;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Primary Heading (h2) Styling */
+.heading-primary {
+    font-size: 2.5rem;
+    color: #333;
+    background: linear-gradient(135deg, #4682b4 0%, #ff7f50 100%);
+    background-clip: text; /* Standard property */
+    -webkit-background-clip: text; /* WebKit-specific prefix for older browsers */
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .task-page-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .heading-container, .form-container {
+        padding: 0;
+    }
+}

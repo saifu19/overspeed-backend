@@ -1,0 +1,51 @@
+<head>
+
+  <!-- Include Vite for CSS and JS -->
+  @vite(['resources/css/displayTask.css'])
+
+
+</head>
+
+
+{{--  <h2 class="heading-primary">Your Tasks</h2>
+
+<ul class="task-list">
+    @if (tasks && tasks.length > 0)
+        @each (task in tasks)
+        <li class="task-item">
+            <h3>{{ task.title }}</h3>
+            <p>{{ task.description }}</p>
+        </li>
+        @endeach
+    @else
+        <li class="task-item no-tasks">No tasks yet.</li>
+    @endif
+</ul>
+
+<!-- Navigation Buttons -->
+<div class="task-actions">
+    <a href="{{ route('task.tasks.create') }}" class="btn btn-primary">New Task</a>
+    <a href="{{ route('/') }}" class="btn btn-secondary">Home</a>
+</div>  --}}
+
+@extends('layouts.main')
+
+@section('content')
+    <h2>Your Tasks for {{ project.title }}</h2>
+
+    <ul>
+        @if (tasks && tasks.length > 0)
+            @each (task in tasks)
+            <li>
+                <h3>{{ task.title }}</h3>
+                <p>{{ task.description }}</p>
+            </li>
+            @endeach
+        @else
+            <li>No tasks yet.</li>
+        @endif
+    </ul>
+
+    <!-- Button to create a new task within the project -->
+    <a href="{{ route('tasks.create', { projectId: project.id }) }}" class="btn btn-primary">New Task</a>
+@endsection
