@@ -15,6 +15,7 @@
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
+    "#helpers/*": "./app/helpers/*.js",
     "#exceptions/*": "./app/exceptions/*.js",
     "#models/*": "./app/models/*.js",
     "#mails/*": "./app/mails/*.js",
@@ -58,12 +59,15 @@
     "@adonisjs/shield": "^8.1.1",
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^3.0.0",
+    "@langchain/community": "^0.3.15",
     "@vinejs/vine": "^2.1.0",
     "edge.js": "^6.0.2",
+    "langchain": "^0.3.6",
     "luxon": "^3.5.0",
     "mysql": "^2.18.1",
     "mysql2": "^3.11.3",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1"
   },
   "hotHook": {
     "boundaries": [
