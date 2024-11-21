@@ -97,30 +97,11 @@ export default class ProjectController {
 			return response.redirect().back();
 		}
 	}
-}
-
-<<<<<<< HEAD
 
 
-  // Delete a project
-  async destroy({ params, auth, response, session }: HttpContext) {
-    const user = auth.user;
 
-    if (!user) {
-      session.flash({ error: 'You must be logged in to delete a project.' });
-      return response.redirect().toPath('/login');
-    }
 
-    const result = await ProjectService.deleteProject(params.projectId, user);
-
-    if (result.status === 200) {
-      session.flash({ success: result.message ?? 'Operation completed successfully.' });
-      return response.redirect().back();
-    } else {
-      session.flash({ error: result.error || 'An error occurred.' });
-      return response.redirect().back();
-    }
-  }
+  
 
 
 
@@ -273,5 +254,3 @@ public async DestroyProject_EndPoint({ params, auth, response }: HttpContext) {
 
   }
 
-=======
->>>>>>> b84e23fa40a39d0a0ee4c31629fc6c5dcee4a2fb
