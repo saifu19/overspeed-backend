@@ -1,5 +1,5 @@
 import ProjectService from '#services/projectServices';
-import { prettyPrintError } from '@adonisjs/core';
+// import { prettyPrintError } from '@adonisjs/core';
 
 import type { HttpContext } from '@adonisjs/core/http';
 
