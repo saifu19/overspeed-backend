@@ -59,4 +59,70 @@ export default class TaskController {
       return response.redirect().back();
     }
   }
+
+
+  //API EndPoints
+
+  // Create a task in a project - API Endpoint
+  public async CreateTask_EndPoint({ request, params, auth, response }: HttpContext) {
+    const user = auth.user;
+
+    if (!user) {
+      console.log("hit 401")
+      return response.status(401).json({
+        status: 'error',
+        message: 'You must be logged in to view projects.',
+      });
+    }
+
+    // Extract data from the request body
+    const { title, description, dueDate, assigneeId } = request.only(['title', 'description', 'dueDate', 'assigneeId']);
+    const projectId = params.projectId;
+
+    // Call the service function to create the task
+    const result = await TaskService.createTask({
+      title,
+      description,
+      dueDate,
+      projectId: Number(projectId),
+      createdById: user.id,
+      assigneeId: assigneeId ? Number(assigneeId) : undefined,
+    });
+
+    // Return the service response as JSON
+    if (result.status === 201) {
+      return response.status(200).json({status:'success',message: result.message, task: result.data });
+    } else {
+      return response.status(500).json({ status:'error', error: result.message || 'Failed to create task.' });
+    }
+  }
+
+
+  // Delete a task - API Endpoint
+  public async DestroyTask_EndPoint({ params, auth, response }: HttpContext) {
+    const user = auth.user;
+
+    if (!user) {
+      console.log("hit 401")
+      return response.status(401).json({
+        status: 'error',
+        message: 'You must be logged in to view projects.',
+      });
+    }
+
+    // Extract the task ID from the request params
+    const taskId = Number(params.taskId);
+
+    // Call the service function to delete the task
+    const result = await TaskService.deleteTask(taskId, user);
+
+    // Return the service response as JSON
+    if (result.status === 200) {
+      return response.status(200).json({status:'success', message: result.message });
+    } else {
+      return response.status(500).json({ status:'error',error: result.message || 'Failed to delete task.' });
+    }
+  }
+
+
 }

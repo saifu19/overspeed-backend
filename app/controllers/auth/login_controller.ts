@@ -40,5 +40,35 @@ export default class LoginController {
 
 
   }
+
+
+  //EndPoint
+
+  // Login endpoint
+  // async Login_EndPoint({ request, response, auth }: HttpContext) {
+  //   try {
+  //     // Validate the input using a validator (replace 'loginValidator' with your actual validator)
+  //     const { email, password } = await request.validateUsing(loginValidator);
+
+  //     // Verify user credentials and attempt login
+  //     const user = await User.verifyCredentials(email, password);
+  //     const token = await auth.use('api').attempt(email, password);
+
+  //     // Return success response with the JWT token
+  //     return response.status(200).json({
+  //       status: 'success',
+  //       message: 'Login successful',
+  //       token: token.toJSON(), // Returns the token and expiration info
+  //     });
+  //   } catch (error) {
+  //     console.error('Login error:', error);
+
+  //     // Return error response
+  //     return response.status(401).json({
+  //       status: 'error',
+  //       message: 'Invalid login credentials. Please try again.',
+  //     });
+  //   }
+  // }
   
 }

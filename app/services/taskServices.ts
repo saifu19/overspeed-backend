@@ -55,7 +55,7 @@ class TaskService {
       });
     }
 
-    return { status: 200, message: 'Task created successfully.', task };
+    return { status: 200, message: 'Task created successfully.', data : task };
   }
 
 

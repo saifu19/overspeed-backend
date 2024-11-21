@@ -11,6 +11,7 @@ const authConfig = defineConfig({
         model: () => import('#models/user')
       }),
     }),
+    
   },
 })
 
