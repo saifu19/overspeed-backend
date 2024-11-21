@@ -6,12 +6,8 @@ export default class ExecutorManager {
         this.executors = new Map();
     }
 
-    public async getExecutorForUser(userId: string, conversation_id: number, session: any, modelName?: string) {
-        
-        if (session.has('subdomain') && session.has('subdomain_name')) {
-            userId = userId + "-" + session.get('subdomain') + "-" + session.get('subdomain_name');
-        }
-        const exec_id = (userId + "-" + conversation_id).toString();
+    public async getExecutorForUser(userId: number, conversation_id: number, modelName?: string) {
+        const exec_id = (userId.toString() + "-" + conversation_id.toString());
         if (!this.executors.has(exec_id)) {
             this.executors.set(exec_id, new Executor());
             await this.executors.get(exec_id)?.setExecutorId(exec_id);
@@ -19,12 +15,11 @@ export default class ExecutorManager {
             if (modelName === undefined) {
                 modelName = await this.executors.get(exec_id)?.getModel();
             }
-            await this.executors.get(exec_id)?.setModel({ modelName });
+            await this.executors.get(exec_id)?.setModel({ modelName: modelName || "gpt-4o-mini" });
             await this.executors.get(exec_id)?.initExecutor();
         }
 
         return this.executors.get(exec_id);
-        
     }
 
 }
