@@ -16,11 +16,12 @@ export default class AuthMiddleware {
     ctx: HttpContext,
     next: NextFn,
     options: {
-      guards?: (keyof Authenticators)[]
+      guards?: (keyof Authenticators)[
+      ]
     } = {}
   ) 
   {
-    await ctx.auth.authenticateUsing(options.guards  || ['web'], { loginRoute: this.redirectTo })
+    await ctx.auth.authenticateUsing(options.guards || ['web'], { loginRoute: this.redirectTo })
     return next()
   }
 }

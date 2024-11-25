@@ -1,16 +1,3 @@
-/*
-|--------------------------------------------------------------------------
-| Routes file
-|--------------------------------------------------------------------------
-|
-| The routes file is used for defining the HTTP routes.
-|
-*/
-
-// import RegisterController from '#controllers/auth/register_controller'
-// import LoginController from '#controllers/auth/login_controller'
-// import LogoutController from '#controllers/auth/logout_controller'
-
 import router from '@adonisjs/core/services/router'
 
 const RegisterController = () => import('../app/controllers/auth/register_controller.js')
@@ -24,6 +11,7 @@ const TaskController = () => import('../app/controllers/tasks/task_controller.js
 const ProjectController = () => import('../app/controllers/projects/projectController.js')
 
 import { middleware } from '#start/kernel'
+// import { HttpContext } from '@adonisjs/core/http';
 
 
 router.get('/', async (ctx) => {
@@ -33,7 +21,7 @@ router.get('/', async (ctx) => {
     return ctx.view.render('pages/home')
 
 
-} )
+})
 
 // router.get('/dummy', async ( { view } ) => {
 
@@ -43,19 +31,30 @@ router.get('/', async (ctx) => {
 
 // } )
 
-
 router.group(() => {
-    
-    router.get('/register',[RegisterController,'show']).as('register.show')
-    router.post('/register',[RegisterController,'store']).as('register.store')
 
-    router.get('/login',[LoginController,'show']).as('login.show')
-    router.post('/login',[LoginController,'store']).as('login.store')
+    router.get('/register', [RegisterController, 'show']).as('register.show')
+    router.post('/register', [RegisterController, 'store']).as('register.store')
 
-    router.post('/logout',[LogoutController,'handle']).as('logout')
+    router.get('/login', [LoginController, 'show']).as('login.show')
+    router.post('/login', [LoginController, 'store']).as('login.store')
+
+    router.post('/logout', [LogoutController, 'handle']).as('logout')
 
 }).as('auth')
 
+// API Routes
+router.group(() => {
+    // router.options('/api/*', async ({ response }: HttpContext) => {
+    //     return response.status(200).send({})
+    // })
+    
+    router.post('/api/login', [LoginController, 'handle']).as('api.login')
+    router.post('/api/register', [RegisterController, 'handle']).as('api.register')
+    router.post('/api/logout/:id', [LogoutController, 'handle']).as('api.logout').use(middleware.auth({
+        guards: ['api']
+    }))
+})
 // Task routes (create, list)
 // router.group(() => {
 //     router.get('/tasks', [TaskController, 'index']).as('tasks.index').use(middleware.auth());  // List tasks

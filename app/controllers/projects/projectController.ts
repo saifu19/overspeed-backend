@@ -59,7 +59,6 @@ export default class ProjectController {
 		}
 	}
 
-
 	async create({ view }: HttpContext) {
 		return view.render('pages/projects/createProject');
 	}
