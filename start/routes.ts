@@ -51,10 +51,10 @@ router.group(() => {
     router.post('/api/register', [RegisterController, 'handle']).as('api.register')
 })
 
+// Add new routes here
 router.group(() => {
-    router.post('/api/logout/:id', [LogoutController, 'handle']).as('api.logout').use(middleware.auth({
-        guards: ['api']
-    }))
+    router.post('/api/logout/:id', [LogoutController, 'handle']).as('api.logout')
+    // .......
 }).use(middleware.auth({
     guards: ['api']
 }))
