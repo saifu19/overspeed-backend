@@ -135,12 +135,10 @@ export default class ProjectController {
 
   // Show all projects for a specific user - API Endpoint
   public async FetchProjects_EndPoint({ auth, response }: HttpContext) {
-    console.log("hit ")
     try {
       const user = auth.user;
 
       if (!user) {
-        console.log("hit 401")
         return response.status(401).json({
           status: 'error',
           message: 'You must be logged in to view projects.',
@@ -150,7 +148,6 @@ export default class ProjectController {
       // Fetch projects from ProjectService
       const projects = await ProjectService.fetchUserProjects(user);
       
-      console.log("hit 200")
       return response.status(200).json({
         status: 'success',
         message: 'Projects fetched successfully',
