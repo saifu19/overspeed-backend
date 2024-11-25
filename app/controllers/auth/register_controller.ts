@@ -5,13 +5,13 @@ import type { HttpContext } from '@adonisjs/core/http'
 export default class RegisterController {
 
 	async handle({ request, response }: HttpContext) {
+
 		try {
 			const data = await request.validateUsing(registerValidator)
 			const user = await User.create(data)
 
 			// Generate API token for the new user
 			const token = await User.accessTokens.create(user, ['*'], { expiresIn: "1 hour" })
-
 			return response.json({
 				status: 'success',
 				data: {

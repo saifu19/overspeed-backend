@@ -54,6 +54,18 @@ router.group(() => {
 // Add new routes here
 router.group(() => {
     router.post('/api/logout/:id', [LogoutController, 'handle']).as('api.logout')
+
+    router.post('/api/projects', [ProjectController , 'CreateProject_EndPoint']).as('api.createProject');
+    router.post('/api/projects/:id/add-user', [ProjectController , 'AddUser_EndPonit']);
+    router.post('/api/projects/:id/remove-user', [ProjectController , 'RemoveUser_EndPoint']);
+    router.delete('/api/projects/:projectId', [ProjectController , 'DestroyProject_EndPoint']);
+
+    router.post('/api/projects/:projectId/tasks', [TaskController , 'CreateTask_EndPoint']);
+    router.delete('/api/projects/:projectId/tasks/:taskId', [TaskController , 'DestroyTask_EndPoint']);
+
+    router.get('/api/projects', [ProjectController , 'FetchProjects_EndPoint']);
+
+
     // .......
 }).use(middleware.auth({
     guards: ['api']
@@ -80,18 +92,18 @@ router.group(() => {
 
 
 //API EndPoints
-router.group(() => {
-    router.post('/api/projects', [ProjectController , 'CreateProject_EndPoint']);
-    router.get('/api/projects', [ProjectController , 'FetchProjects_EndPoint']);
-    router.post('/api/projects/:id/add-user', [ProjectController , 'AddUser_EndPonit']);
-    router.post('/api/projects/:id/remove-user', [ProjectController , 'RemoveUser_EndPoint']);
-    router.delete('/api/projects/:projectId', [ProjectController , 'DestroyProject_EndPoint']);
+// router.group(() => {
+//     router.post('/api/projects', [ProjectController , 'CreateProject_EndPoint']);
+//     router.get('/api/projects', [ProjectController , 'FetchProjects_EndPoint']);
+//     router.post('/api/projects/:id/add-user', [ProjectController , 'AddUser_EndPonit']);
+//     router.post('/api/projects/:id/remove-user', [ProjectController , 'RemoveUser_EndPoint']);
+//     router.delete('/api/projects/:projectId', [ProjectController , 'DestroyProject_EndPoint']);
 
-    router.post('/api/projects/:projectId/tasks', [TaskController , 'CreateTask_EndPoint']);
-    router.delete('/api/projects/:projectId/tasks/:taskId', [TaskController , 'CreateTask_EndPoint']);
-
-
-    // router.post('/api/login', [LoginController ,'Login_EndPoint']);
+//     router.post('/api/projects/:projectId/tasks', [TaskController , 'CreateTask_EndPoint']);
+//     router.delete('/api/projects/:projectId/tasks/:taskId', [TaskController , 'CreateTask_EndPoint']);
 
 
-});
+//     // router.post('/api/login', [LoginController ,'Login_EndPoint']);
+
+
+// });

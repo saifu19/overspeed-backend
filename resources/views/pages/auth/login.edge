@@ -9,7 +9,7 @@
     <form method="post" action="{{ route('auth.login.store') }}">
 
       
-      {{ csrfField() }}
+      {{--  @csrf  --}}
 
       @if (session.has('error'))
   <div class="alert alert-danger">

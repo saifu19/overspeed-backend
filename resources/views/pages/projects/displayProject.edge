@@ -36,7 +36,7 @@
                     method="POST"
                     style="display: inline;"
                 >
-                    {{ csrfField() }}
+                    {{--  {{ csrfField() }}  --}}
                             <input type="hidden" name="_method" value="DELETE" />
                     <button
                     type="submit"
@@ -62,7 +62,7 @@
                   method="POST"
                   style="display:inline"
                 >
-                  {{ csrfField() }}
+                  {{--  {{ csrfField() }}  --}}
                   <input type="hidden" name="userId" value="{{ user.id }}" />
                   <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                 </form>
@@ -79,7 +79,7 @@
                 action="{{ route('projects.addUser', { id: project.id }) }}"
                 method="POST"
               >
-                {{ csrfField() }}
+                {{--  {{ csrfField() }}  --}}
                 <input
                   type="email"
                   name="email"
@@ -118,7 +118,7 @@
                   @if(task.createdById === auth.user.id)
                   <!-- Delete Task Button -->
                   <form method="POST" action="{{ route('tasks.destroy', { projectId: project.id, taskId: task.id }) }}">
-                    {{ csrfField() }}
+                    {{--  {{ csrfField() }}  --}}
                                 <input type="hidden" name="_method" value="DELETE" />
                     <button type="submit" class="btn btn-danger">Delete Task</button>
                   </form>
@@ -143,7 +143,7 @@
             action="{{ route('projects.tasks.store', { projectId: project.id }) }}"
             style="display: none;"
           >
-            {{ csrfField() }}
+            {{--  {{ csrfField() }}  --}}
                     <input type="hidden" name="project_id" value="{{ project.id }}" />
             <div class="form-group">
               <label for="task-title">New Task Title</label>
@@ -154,7 +154,7 @@
               <textarea id="task-desc" name="description" placeholder="Enter task description" required></textarea>
             </div>
             <div class="form-group">
-                <label for="task-desc">Due Date</label>
+                <label for="due-date">Due Date</label>
                 <input type="date" id="dueDate" name="dueDate" placeholder="Enter deadline" required />
             </div>
             <!-- Assignee Dropdown -->

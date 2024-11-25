@@ -68,7 +68,6 @@ export default class TaskController {
     const user = auth.user;
 
     if (!user) {
-      console.log("hit 401")
       return response.status(401).json({
         status: 'error',
         message: 'You must be logged in to view projects.',
@@ -90,7 +89,7 @@ export default class TaskController {
     });
 
     // Return the service response as JSON
-    if (result.status === 201) {
+    if (result.status === 200) {
       return response.status(200).json({status:'success',message: result.message, task: result.data });
     } else {
       return response.status(500).json({ status:'error', error: result.message || 'Failed to create task.' });
@@ -100,10 +99,12 @@ export default class TaskController {
 
   // Delete a task - API Endpoint
   public async DestroyTask_EndPoint({ params, auth, response }: HttpContext) {
+
+    console.log("hello");
+
     const user = auth.user;
 
     if (!user) {
-      console.log("hit 401")
       return response.status(401).json({
         status: 'error',
         message: 'You must be logged in to view projects.',

@@ -60,12 +60,12 @@ class TaskService {
 
 
   async deleteTask(taskId: number, user: User) {
+
     // Check if the task exists and load related project with users
     const task = await Task.query()
       .where('id', taskId)
       .preload('project', (projectQuery) => projectQuery.preload('users'))
       .first();
-
     if (!user) {
       return { status: 401, message: 'You must be logged in to delete a task.' };
     }
