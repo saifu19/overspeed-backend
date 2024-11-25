@@ -47,16 +47,17 @@ router.group(() => {
 
 // API Routes
 router.group(() => {
-    // router.options('/api/*', async ({ response }: HttpContext) => {
-    //     return response.status(200).send({})
-    // })
-    
     router.post('/api/login', [LoginController, 'handle']).as('api.login')
     router.post('/api/register', [RegisterController, 'handle']).as('api.register')
+})
+
+router.group(() => {
     router.post('/api/logout/:id', [LogoutController, 'handle']).as('api.logout').use(middleware.auth({
         guards: ['api']
     }))
-})
+}).use(middleware.auth({
+    guards: ['api']
+}))
 
 
 router.group(() => {
