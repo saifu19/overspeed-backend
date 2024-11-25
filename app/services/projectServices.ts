@@ -41,11 +41,11 @@ class ProjectService {
   }
 
   // Fetch projects where the user is the owner or a member
-  async fetchUserProjects(user: User) {
+  async fetchUserProjects(user: any) {
     return await Project.query()
-      .where('createdById', user.id)  // Projects owned by the user
+      .where('createdById', user)  // Projects owned by the user
       .orWhereHas('users', (query) => {
-        query.where('users.id', user.id);  // Projects where the user is a member
+        query.where('users.id', user);  // Projects where the user is a member
       })
       .preload('tasks', (taskQuery) => {
         taskQuery.preload('assignee');  // Preload assignee data for each task

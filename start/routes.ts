@@ -1,3 +1,13 @@
+/*
+|--------------------------------------------------------------------------
+| Routes file
+|--------------------------------------------------------------------------
+|
+| The routes file is used for defining the HTTP routes.
+|
+*/
+
+
 import router from '@adonisjs/core/services/router'
 
 const RegisterController = () => import('../app/controllers/auth/register_controller.js')
@@ -23,14 +33,6 @@ router.get('/', async (ctx) => {
 
 })
 
-// router.get('/dummy', async ( { view } ) => {
-
-
-//     return view.render('pages/home')
-
-
-// } )
-
 router.group(() => {
 
     router.get('/register', [RegisterController, 'show']).as('register.show')
@@ -55,13 +57,7 @@ router.group(() => {
         guards: ['api']
     }))
 })
-// Task routes (create, list)
-// router.group(() => {
-//     router.get('/tasks', [TaskController, 'index']).as('tasks.index').use(middleware.auth());  // List tasks
-//     router.get('/tasks/create', [TaskController, 'create']).as('tasks.create').use(middleware.auth());  // Show create task form
-//     router.post('/tasks', [TaskController, 'store']).as('tasks.store').use(middleware.auth());  // Store task
-//   }).use(middleware.auth())
-//   .as('task');  // These routes are protected and require authentication
+
 
 router.group(() => {
     // Project routes
@@ -77,3 +73,24 @@ router.group(() => {
     router.post('/projects/:projectId/tasks', [TaskController, 'store']).as('projects.tasks.store');
     router.post('/projects/:projectId/tasks/:taskId', [TaskController, 'destroy']).as('tasks.destroy');
 }).use(middleware.auth());
+
+
+
+
+
+//API EndPoints
+router.group(() => {
+    router.post('/api/projects', [ProjectController , 'CreateProject_EndPoint']);
+    router.get('/api/projects', [ProjectController , 'FetchProjects_EndPoint']);
+    router.post('/api/projects/:id/add-user', [ProjectController , 'AddUser_EndPonit']);
+    router.post('/api/projects/:id/remove-user', [ProjectController , 'RemoveUser_EndPoint']);
+    router.delete('/api/projects/:projectId', [ProjectController , 'DestroyProject_EndPoint']);
+
+    router.post('/api/projects/:projectId/tasks', [TaskController , 'CreateTask_EndPoint']);
+    router.delete('/api/projects/:projectId/tasks/:taskId', [TaskController , 'CreateTask_EndPoint']);
+
+
+    // router.post('/api/login', [LoginController ,'Login_EndPoint']);
+
+
+});
