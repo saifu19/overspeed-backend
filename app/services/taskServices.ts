@@ -45,6 +45,7 @@ class TaskService {
         projectId,
         createdById,
         assigneeId: assigneeId ?? undefined,  // Use undefined instead of null
+        status: 'In Progress',
       });
       
 
@@ -88,8 +89,32 @@ class TaskService {
     await task.delete();
     return { status: 200, message: 'Task deleted successfully.' };
   }
+
+  async updateTaskStatus(taskId: number, newStatus: string) {
+    try {
+      const task = await Task.findOrFail(taskId);
+      // Update the task status
+      task.status = newStatus;
+      await task.save();
+
+      return {
+        status: 200,
+        message: 'Task status updated successfully',
+        data: task,
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        message: 'Failed to update task status',
+        error: error.message,
+      };
+    }
+  }
+
+
 }
 
+  
 
 
 export default new TaskService();

@@ -100,8 +100,6 @@ export default class TaskController {
   // Delete a task - API Endpoint
   public async DestroyTask_EndPoint({ params, auth, response }: HttpContext) {
 
-    console.log("hello");
-
     const user = auth.user;
 
     if (!user) {
@@ -125,5 +123,27 @@ export default class TaskController {
     }
   }
 
+
+  public async UpdateTaskStatus_EndPoint({ params, request, auth, response }: HttpContext) {
+    const user = auth.user;
+
+    if (!user) {
+      return response.status(401).json({
+        status: 'error',
+        message: 'You must be logged in to update a task status.',
+      });
+    }
+
+    const taskId = Number(params.taskId);
+    const { newStatus } = request.only(['newStatus']); // Extract the new status from the request body
+
+    const result = await TaskService.updateTaskStatus(taskId, newStatus);
+
+    if (result.status === 200) {
+      return response.status(200).json({ status: 'success', message: result.message, task: result.data });
+    } else {
+      return response.status(500).json({ status: 'error', message: result.message });
+    }
+  }
 
 }

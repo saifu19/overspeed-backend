@@ -62,6 +62,8 @@ router.group(() => {
 
     router.post('/api/projects/:projectId/tasks', [TaskController , 'CreateTask_EndPoint']);
     router.delete('/api/projects/:projectId/tasks/:taskId', [TaskController , 'DestroyTask_EndPoint']);
+    router.patch('/api/projects/:projectId/tasks/:taskId/status', [TaskController , 'UpdateTaskStatus_EndPoint'])
+
 
     router.get('/api/projects', [ProjectController , 'FetchProjects_EndPoint']);
 
