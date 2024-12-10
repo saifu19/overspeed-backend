@@ -13,7 +13,7 @@ export default class TaskController {
       return response.redirect().toPath('/login');
     }
 
-    const { title, description, dueDate, assigneeId } = request.only(['title', 'description', 'dueDate', 'assigneeId']);
+    const { title, description, dueDate, assigneeId, status } = request.only(['title', 'description', 'dueDate', 'assigneeId', 'status']);
     const projectId = params.projectId;
 
     // Call service to create task
@@ -24,6 +24,7 @@ export default class TaskController {
       projectId: Number(projectId),
       createdById: user.id,
       assigneeId: assigneeId ? Number(assigneeId) : undefined,
+      status: status ?? 'Backlog',
     });
 
     // Handle response based on status
@@ -35,7 +36,6 @@ export default class TaskController {
       return response.redirect().back();
     }
   }
-  
 
   // Delete a task (Only users in the project can delete tasks)
   async destroy({ params, auth, response, session }: HttpContext) {

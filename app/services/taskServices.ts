@@ -7,13 +7,14 @@ import User from '#models/user';  // Import User model for type definition
 
 class TaskService {
   // Create a task within a project and assign it to a user if specified
-  async createTask({ title, description, dueDate, projectId, createdById, assigneeId }: {
+  async createTask({ title, description, dueDate, projectId, createdById, assigneeId, status }: {
     title: string,
     description: string,
     dueDate: string,
     projectId: number,
     createdById: number,
-    assigneeId?: number
+    assigneeId?: number,
+    status?: string
   }) {
     // Check if the project exists and preload users
     const project = await Project.query()
@@ -45,7 +46,7 @@ class TaskService {
         projectId,
         createdById,
         assigneeId: assigneeId ?? undefined,  // Use undefined instead of null
-        status: 'In Progress',
+        status: status ?? 'Backlog',
       });
       
 
