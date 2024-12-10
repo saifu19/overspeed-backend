@@ -1,27 +1,12 @@
-/*
-|--------------------------------------------------------------------------
-| Routes file
-|--------------------------------------------------------------------------
-|
-| The routes file is used for defining the HTTP routes.
-|
-*/
-
-
 import router from '@adonisjs/core/services/router'
-
-const RegisterController = () => import('../app/controllers/auth/register_controller.js')
-
-const LoginController = () => import('../app/controllers/auth/login_controller.js')
-
-const LogoutController = () => import('../app/controllers/auth/logout_controller.js')
-
-const TaskController = () => import('../app/controllers/tasks/task_controller.js');  // TaskController for tasks
-
-const ProjectController = () => import('../app/controllers/projects/projectController.js')
-
+import RegisterController from '#controllers/auth/register_controller'
+import LoginController from '#controllers/auth/login_controller'
+import LogoutController from '#controllers/auth/logout_controller'
+import TaskController from '#controllers/tasks/task_controller'
+import ProjectController from '#controllers/projects/project_controller'
+import ConversationsController from '#controllers/langchain/conversations_controller';
+import MessagesController from '#controllers/langchain/messages_controller';
 import { middleware } from '#start/kernel'
-// import { HttpContext } from '@adonisjs/core/http';
 
 
 router.get('/', async (ctx) => {
@@ -55,20 +40,22 @@ router.group(() => {
 router.group(() => {
     router.post('/api/logout/:id', [LogoutController, 'handle']).as('api.logout')
 
-    router.post('/api/projects', [ProjectController , 'CreateProject_EndPoint']).as('api.createProject');
-    router.post('/api/projects/:id/add-user', [ProjectController , 'AddUser_EndPonit']);
-    router.post('/api/projects/:id/remove-user', [ProjectController , 'RemoveUser_EndPoint']);
-    router.delete('/api/projects/:projectId', [ProjectController , 'DestroyProject_EndPoint']);
+    router.post('/api/projects', [ProjectController, 'CreateProject_EndPoint']).as('api.createProject');
+    router.post('/api/projects/:id/add-user', [ProjectController, 'AddUser_EndPonit']);
+    router.post('/api/projects/:id/remove-user', [ProjectController, 'RemoveUser_EndPoint']);
+    router.delete('/api/projects/:projectId', [ProjectController, 'DestroyProject_EndPoint']);
 
-    router.post('/api/projects/:projectId/tasks', [TaskController , 'CreateTask_EndPoint']);
-    router.delete('/api/projects/:projectId/tasks/:taskId', [TaskController , 'DestroyTask_EndPoint']);
-    router.patch('/api/projects/:projectId/tasks/:taskId/status', [TaskController , 'UpdateTaskStatus_EndPoint'])
-
+    router.post('/api/projects/:projectId/tasks', [TaskController, 'CreateTask_EndPoint']);
+    router.delete('/api/projects/:projectId/tasks/:taskId', [TaskController, 'DestroyTask_EndPoint']);
+    router.patch('/api/projects/:projectId/tasks/:taskId/status', [TaskController, 'UpdateTaskStatus_EndPoint'])
 
     router.get('/api/projects', [ProjectController , 'FetchProjects_EndPoint']);
 
-
-    // .......
+    // Langchain Routes
+    router.post('/api/conversations', [ConversationsController, 'createConversation']).as('api.conversations.create')
+    router.post('/api/conversations/prepare', [ConversationsController, 'prepareConversation']).as('api.conversations.prepare')
+    
+    router.post('/api/messages/send', [MessagesController, 'sendMessage']).as('api.messages.send')
 }).use(middleware.auth({
     guards: ['api']
 }))

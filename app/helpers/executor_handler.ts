@@ -47,10 +47,6 @@ export default class Executor {
     }
 
     public async *invoke({ input, session, userId }: { input: string, session: any, userId: number }): AsyncGenerator<string> {
-        // const publicKey = await Env.get('LANGFUSE_PUBLIC_KEY');
-        // const secretKey = await Env.get('LANGFUSE_SECRET_KEY');
-        // const baseUrl = await Env.get('LANGFUSE_BASEURL');
-        // const langfuseLangchainHandler = new CallbackHandler({ publicKey, secretKey, baseUrl, sessionId: session.sessionId });
         try {
             let result;
             result = this.executor?.streamLog({
@@ -58,9 +54,7 @@ export default class Executor {
             }, {
                 configurable: {
                     sessionId: session.sessionId,
-                    // callbacks: [langfuseLangchainHandler]
                 },
-                // callbacks: [langfuseLangchainHandler]
             });
 
             let stopAnswer = false;
@@ -102,7 +96,7 @@ export default class Executor {
                         yield '{MESSAGE ENDS HERE}';
                         break;
                     }
-                    if (JSON.stringify(chunk.ops[0].path).trim().includes("/streamed_output_str/-") && this.agentType == "agent") {
+                    if (JSON.stringify(chunk.ops[0].path).trim().includes("/streamed_output_str/-")) {
                         yield chunk.ops[0].value;
                     } else if (JSON.stringify(chunk.ops[0].path).trim() == '"/final_output"') {
                         this.updateMemory({ input: input, output: chunk.ops[0].value.output })
@@ -156,7 +150,7 @@ export default class Executor {
         this.activeTools = activeTools;
     }
 
-    public async setPrompt({ promptString }: { promptString: string }) {
+    public async setPrompt(promptString: string) {
         this.promptString = promptString
         this.prompt = ChatPromptTemplate.fromMessages([
             ["human", promptString],
