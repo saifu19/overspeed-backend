@@ -18,6 +18,7 @@ export default class ProjectUser extends BaseSchema {
         .references('id')
         .inTable('users')
         .onDelete('CASCADE');
+      table.string('role').notNullable().defaultTo('Developer'); // Add role column
       table.timestamp('created_at', { useTz: true }).defaultTo(this.now());
       table.timestamp('updated_at', { useTz: true }).defaultTo(this.now());
 

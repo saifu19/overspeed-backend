@@ -9,7 +9,11 @@ import Project from '#models/project';
 export default class ProjectUser extends BaseModel {
     @column({ isPrimary: true })
     declare id: number
-  
+
+    @column()
+    declare role: string;
+
+
     @hasOne(() => Project)
     declare project: HasOne<typeof Project>
   

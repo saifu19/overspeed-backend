@@ -1,12 +1,25 @@
 import router from '@adonisjs/core/services/router'
-import RegisterController from '#controllers/auth/register_controller'
-import LoginController from '#controllers/auth/login_controller'
-import LogoutController from '#controllers/auth/logout_controller'
-import TaskController from '#controllers/tasks/task_controller'
-import ProjectController from '#controllers/projects/project_controller'
-import ConversationsController from '#controllers/langchain/conversations_controller';
-import MessagesController from '#controllers/langchain/messages_controller';
+// import RegisterController from '#controllers/auth/register_controller'
+// import LoginController from '#controllers/auth/login_controller'
+// import LogoutController from '#controllers/auth/logout_controller'
+// import TaskController from '#controllers/tasks/task_controller'
+// import ProjectController from '#controllers/projects/project_controller'
+// import ConversationsController from '#controllers/langchain/conversations_controller';
+// import MessagesController from '#controllers/langchain/messages_controller';
 import { middleware } from '#start/kernel'
+
+
+const RegisterController = () => import('#controllers/auth/register_controller');
+const LoginController = () => import('#controllers/auth/login_controller');
+const LogoutController = () => import('#controllers/auth/logout_controller');
+const TaskController = () => import('#controllers/tasks/task_controller');
+const ProjectController = () => import('#controllers/projects/project_controller');
+const ConversationsController = () => import('#controllers/langchain/conversations_controller');
+const MessagesController = () => import('#controllers/langchain/messages_controller');
+
+
+
+
 
 
 router.get('/', async (ctx) => {
