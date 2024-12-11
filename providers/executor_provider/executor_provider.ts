@@ -9,8 +9,8 @@ export default class ExecutorProvider {
 	 */
 	register() {
 		this.app.container.singleton('langchain/manager', () => {
-			return new ExecutorManager();
-		});
+			return new ExecutorManager()
+		})
 	}
 
 	/**

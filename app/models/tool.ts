@@ -17,6 +17,9 @@ export default class Tool extends BaseModel {
 	@column()
 	declare schema: string
 
+	@column()
+	declare is_active: boolean
+
 	@column.dateTime({ autoCreate: true })
 	declare createdAt: DateTime
 

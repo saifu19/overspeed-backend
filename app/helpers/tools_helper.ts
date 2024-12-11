@@ -3,51 +3,62 @@ import { z } from 'zod';
 import Tool from '#models/tool';
 import Env from '#start/env'
 import { DynamicStructuredTool } from "langchain/tools";
-import type { ExecutorManager } from '#contracts/langchain'
-import { inject } from '@adonisjs/core'
+import ExecutorManager from '#providers/executor_provider/index';
+import mysql from 'mysql';
 
-@inject()
+interface ActiveTools {
+    [key: number]: number[];
+}
 export default class ToolsHelper {
-    mysql = require('mysql')
-	connection = {
-		host: Env.get('MYSQL_HOST_MM'),
-		user: Env.get('MYSQL_USER_MM'),
-		password: Env.get('MYSQL_PASSWORD_MM'),
-		database: Env.get('MYSQL_DB_NAME_MM')
-	}
+    mysql: any;
+    connection: any;
+    executorManager: ExecutorManager;
 
-    constructor(protected executorManager: ExecutorManager) { }
+    constructor(executorManager: ExecutorManager) {
+		this.mysql = mysql;
+        this.connection = {
+            host: Env.get('MYSQL_HOST_MM'),
+            user: Env.get('MYSQL_USER_MM'),
+            password: Env.get('MYSQL_PASSWORD_MM'),
+            database: Env.get('MYSQL_DB_NAME_MM')
+        }
+        this.executorManager = executorManager;
+	}
 	
-    async toggleTool({ toggleStatus, session, toolId, userId, conversationId }: { toggleStatus: string, session: any, toolId: number, userId: number, conversationId: number }) {
+    async toggleTool({ toggleStatus, toolId, userId, conversationId }: { toggleStatus: string, session: any, toolId: number, userId: number, conversationId: number }) {
         const tool = await Tool.findOrFail(toolId);
-		const executor = await this.executorManager.getExecutorForUser(userId.toString(), conversationId, session);
+		const executor = await this.executorManager.getExecutorForUser(userId, conversationId);
 		let tools = await executor?.getTools();
 		if (toggleStatus === "on") {
             const newTool = await this.createCustomTool({ tool, schema: JSON.parse(tool.schema) });
             tools?.push(newTool);
 			
-			const activeTools = await executor?.getActiveTools();
+			const activeTools = (await executor?.getActiveTools()) as ActiveTools;
 			activeTools[tool.id] = [
-				tools?.length - 1,
+				(tools?.length ? tools.length - 1 : 0),
 			];
 			await executor?.setActiveTools({ activeTools })
+			tools = tools ? tools : [];
 			await executor?.setTools({ tools })
-			await executor?.initExecutor(session.has('assistant') ? session.get('assistant') : null);
+			await executor?.initExecutor();
 			return true;
 		} else {
-			const activeTools = await executor?.getActiveTools();
+			const activeTools = (await executor?.getActiveTools()) as ActiveTools;
 			const index = activeTools[tool.id][0];
 			let tools = await executor?.getTools();
-			if (index !== tools?.length - 1) {
-				for (let k in activeTools) {
-					if (activeTools[k][0] > index) {
-						activeTools[k][0] = activeTools[k][0] - 1;
+			if (tools) {
+				if (index !== tools?.length - 1) {
+					for (let k in activeTools) {
+						if (activeTools[k][0] > index) {
+							activeTools[k][0] = activeTools[k][0] - 1;
+						}
 					}
 				}
 			}
 			delete activeTools[tool.id];
 			await executor?.setActiveTools({ activeTools })
 			tools?.splice(index, 1);
+			tools = tools ? tools : [];
 			await executor?.setTools({ tools })
 		}
 
