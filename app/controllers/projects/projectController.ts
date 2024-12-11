@@ -13,6 +13,7 @@ export default class ProjectController {
 			return response.redirect().toPath('/login');  // Redirect to login if not authenticated
 		}
 
+
 		const data = request.only(['name', 'description', 'startDate', 'dueDate', 'budget', 'status']);
 		const result = await ProjectService.createProject(data, user);
 
@@ -29,6 +30,7 @@ export default class ProjectController {
 		if (!authUser) return response.redirect().toPath('/login');
 
 		const email = request.input('email');
+    // const role = request.input('role');
 		const result = await ProjectService.addUserToProject(params.id, email, authUser);
 
 		if (result.status === 200) {
@@ -112,13 +114,11 @@ export default class ProjectController {
     const user = auth.user;
 
     if (!user) {
-      console.log("hit 401")
       return response.status(401).json({
         status: 'error',
         message: 'You must be logged in to view projects.',
       });
     }
-
     // Extract relevant fields from the request body
     const data = request.only(['name', 'description', 'startDate', 'dueDate', 'budget', 'status']);
 
@@ -171,7 +171,6 @@ public async AddUser_EndPonit({ params, request, auth, response }: HttpContext) 
 
   // Check if the authenticated user is available
   if (!user) {
-    console.log("hit 401")
     return response.status(401).json({
       status: 'error',
       message: 'You must be logged in to view projects.',
@@ -180,7 +179,7 @@ public async AddUser_EndPonit({ params, request, auth, response }: HttpContext) 
 
   // Extract email from the request body
   const email = request.input('email');
-
+  // const role = request.input('role');
   // Call the service function to add the user
   const result = await ProjectService.addUserToProject(params.id, email, user);
 

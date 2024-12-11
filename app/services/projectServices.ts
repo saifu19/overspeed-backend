@@ -6,10 +6,10 @@ class ProjectService {
   async createProject(data: any, user: User) {
     try {
       const project = await Project.create({ ...data, createdById: user.id });
-      await project.related('users').attach([user.id]);
+      await project.related('users').sync([user.id]);
       return { status: 200, data: project };
     } catch (error) {
-      return { status: 500, error: 'Failed to create project' };
+      return { status: 500, error: error };
     }
   }
 
@@ -73,3 +73,6 @@ class ProjectService {
 }
 
 export default new ProjectService();
+
+
+
