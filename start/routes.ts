@@ -54,8 +54,11 @@ router.group(() => {
     // Langchain Routes
     router.post('/api/conversations', [ConversationsController, 'createConversation']).as('api.conversations.create')
     router.post('/api/conversations/prepare', [ConversationsController, 'prepareConversation']).as('api.conversations.prepare')
-    
+    router.post('/api/conversations/create-and-prepare', [ConversationsController, 'createAndPrepareConversation']).as('api.conversations.createAndPrepare')
+    router.get('/api/conversations/:projectId', [ConversationsController, 'getConversations']).as('api.conversations.get')
+
     router.post('/api/messages/send', [MessagesController, 'sendMessage']).as('api.messages.send')
+    router.get('/api/messages/:conversationId', [MessagesController, 'getMessages']).as('api.messages.get')
 }).use(middleware.auth({
     guards: ['api']
 }))
