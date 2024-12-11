@@ -62,4 +62,15 @@ export default class MessagesController {
     
         return response.json({ status: 'streaming completed' })
     }
+
+    async getMessages({ params, response, auth }: HttpContext) {
+        const conversationId = params.conversationId
+        const user = auth.user
+        if (!user) {
+            return response.status(401).json({ error: 'Unauthorized' })
+        }
+
+        const messages = await Message.query().where('conversation_id', conversationId)
+        return response.json({ messages })
+    }
 }
