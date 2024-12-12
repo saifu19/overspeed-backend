@@ -38,7 +38,9 @@ export default class Project extends BaseModel {
   declare createdBy: BelongsTo<typeof User>;
 
   @manyToMany(() => User, {
-    pivotTable: 'project_user',  // Assuming this is the name of your pivot table
+    pivotTable: 'project_user',
+    pivotColumns: ['role'],   
+
   })
   declare users: ManyToMany<typeof User>;
 

@@ -6,20 +6,24 @@ class ProjectService {
   async createProject(data: any, user: User) {
     try {
       const project = await Project.create({ ...data, createdById: user.id });
-      await project.related('users').attach([user.id]);
+      await project.related('users').attach({
+        [user.id]: { role: 'Project Manager' },
+      });
       return { status: 200, data: project };
     } catch (error) {
-      return { status: 500, error: 'Failed to create project' };
+      return { status: 500, error: error };
     }
   }
 
-  async addUserToProject(projectId: number, userEmail: string, authUser: User) {
+  async addUserToProject(projectId: number, userEmail: string, role: string, authUser: User) {
     try {
       const project = await Project.findOrFail(projectId);
       if (project.createdById !== authUser.id) throw new Error('Unauthorized');
       
       const userToAdd = await User.findByOrFail('email', userEmail);
-      await project.related('users').attach([userToAdd.id]);
+      await project.related('users').attach({
+        [userToAdd.id]: { role }, // Add role in pivot data
+      });
       return { status: 200, data: userToAdd };
     } catch (error) {
       return { status: 400, error: error.message };
@@ -50,7 +54,9 @@ class ProjectService {
       .preload('tasks', (taskQuery) => {
         taskQuery.preload('assignee');  // Preload assignee data for each task
       })
-      .preload('users');  // Preload users if needed
+      .preload('users', (userQuery) => {
+        userQuery.pivotColumns(['role']); // Include role from the pivot table
+      });
   }
 
   // Delete a project if the user is the creator
@@ -73,3 +79,6 @@ class ProjectService {
 }
 
 export default new ProjectService();
+
+
+

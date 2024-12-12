@@ -13,6 +13,7 @@ export default class ProjectController {
 			return response.redirect().toPath('/login');  // Redirect to login if not authenticated
 		}
 
+
 		const data = request.only(['name', 'description', 'startDate', 'dueDate', 'budget', 'status']);
 		const result = await ProjectService.createProject(data, user);
 
@@ -28,8 +29,10 @@ export default class ProjectController {
 		const authUser = auth.user;
 		if (!authUser) return response.redirect().toPath('/login');
 
-		const email = request.input('email');
-		const result = await ProjectService.addUserToProject(params.id, email, authUser);
+		const { email, role } = request.only(['email', 'role']); // Extract email and role from request
+
+    // Call the service function to add the user
+    const result = await ProjectService.addUserToProject(params.id, email,role, authUser);
 
 		if (result.status === 200) {
 			return response.redirect().back();
@@ -112,13 +115,11 @@ export default class ProjectController {
     const user = auth.user;
 
     if (!user) {
-      console.log("hit 401")
       return response.status(401).json({
         status: 'error',
         message: 'You must be logged in to view projects.',
       });
     }
-
     // Extract relevant fields from the request body
     const data = request.only(['name', 'description', 'startDate', 'dueDate', 'budget', 'status']);
 
@@ -171,7 +172,6 @@ public async AddUser_EndPonit({ params, request, auth, response }: HttpContext) 
 
   // Check if the authenticated user is available
   if (!user) {
-    console.log("hit 401")
     return response.status(401).json({
       status: 'error',
       message: 'You must be logged in to view projects.',
@@ -179,10 +179,12 @@ public async AddUser_EndPonit({ params, request, auth, response }: HttpContext) 
   }
 
   // Extract email from the request body
-  const email = request.input('email');
+  // const email = request.input('email');
+  // const role = request.input('role');
+  const { email, role } = request.only(['email', 'role']); // Extract email and role from request
 
   // Call the service function to add the user
-  const result = await ProjectService.addUserToProject(params.id, email, user);
+  const result = await ProjectService.addUserToProject(params.id, email,role, user);
 
   // Handle the service function's response
   if (result.status === 200) {
@@ -197,7 +199,6 @@ public async RemoveUser_EndPoint({ params, request, auth, response }: HttpContex
   const user = auth.user;
 
   if (!user) {
-    console.log("hit 401")
     return response.status(401).json({
       status: 'error',
       message: 'You must be logged in to view projects.',
@@ -224,7 +225,6 @@ public async DestroyProject_EndPoint({ params, auth, response }: HttpContext) {
   const user = auth.user;
 
   if (!user) {
-    console.log("hit 401")
     return response.status(401).json({
       status: 'error',
       message: 'You must be logged in to view projects.',
