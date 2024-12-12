@@ -4,13 +4,12 @@ import ExecutorManager from '#providers/executor_provider/index'
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import ToolsHelper from '#helpers/tools_helper'
-import { Session } from '@adonisjs/session'
 
 @inject()
 export default class ConversationsController {
     protected toolsHelper: ToolsHelper
     constructor(protected executorManager: ExecutorManager) {
-        this.toolsHelper = new ToolsHelper(this.executorManager)
+        this.toolsHelper = new ToolsHelper()
     }
 
     async createConversation({ auth, request, response }: HttpContext) {
@@ -28,7 +27,7 @@ export default class ConversationsController {
         return response.json({ conversation })
     }
 
-    async prepareConversation({ auth, request, response, session }: HttpContext) {
+    async prepareConversation({ auth, request, response }: HttpContext) {
         const { conversationId } = request.only(['conversationId'])
         const user = auth.user
 
@@ -42,7 +41,7 @@ export default class ConversationsController {
             return response.status(404).json({ error: 'Conversation not found' })
         }
         
-        const tools = await this.addToolsToConversation(session, user.id, conversation.id)
+        const tools = await this.addToolsToConversation(user.id, conversation.id, this.executorManager)
 
         const executor = await this.executorManager.getExecutorForUser(user.id, conversation.id)
 
@@ -59,10 +58,10 @@ export default class ConversationsController {
     }
 
     // Helper function to add tools to a conversation
-    async addToolsToConversation(session: Session, userId: number, conversationId: number) {
+    async addToolsToConversation(userId: number, conversationId: number, executorManager: ExecutorManager) {
         const tools = await Tool.query().where('is_active', true)
         for (const tool of tools) {
-            await this.toolsHelper.toggleTool({ toggleStatus: 'on', session: session, toolId: tool.id, userId: userId, conversationId: conversationId })
+            await this.toolsHelper.toggleTool({ toggleStatus: 'on', toolId: tool.id, userId: userId, conversationId: conversationId, executorManager: executorManager })
         }
         return tools
     }
@@ -77,7 +76,7 @@ export default class ConversationsController {
         return response.json({ conversations })
     }
 
-    async createAndPrepareConversation({ request, response, auth, session }: HttpContext) {
+    async createAndPrepareConversation({ request, response, auth }: HttpContext) {
         const project = request.body().projectId
         const user = auth.user
         if (!user) {
@@ -96,7 +95,7 @@ export default class ConversationsController {
                 return response.status(500).json({ error: 'Failed to initialize executor' })
             }
 
-            const tools = await this.addToolsToConversation(session, user.id, conversation.id)
+            const tools = await this.addToolsToConversation(user.id, conversation.id, this.executorManager)
 
             const prompt = "You are a helpful assistant."
 

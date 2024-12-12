@@ -5,18 +5,18 @@ import { DynamicStructuredTool } from "langchain/tools";
 import ExecutorManager from '#providers/executor_provider/index';
 
 interface ActiveTools {
-    [key: number]: number[];
+	[key: number]: number[];
 }
 export default class ToolsHelper {
-	
-    async toggleTool({ toggleStatus, toolId, userId, conversationId, executorManager }: { toggleStatus: string, toolId: number, userId: number, conversationId: number, executorManager: ExecutorManager }) {
-        const tool = await Tool.findOrFail(toolId);
+
+	async toggleTool({ toggleStatus, toolId, userId, conversationId, executorManager }: { toggleStatus: string, toolId: number, userId: number, conversationId: number, executorManager: ExecutorManager }) {
+		const tool = await Tool.findOrFail(toolId);
 		const executor = await executorManager.getExecutorForUser(userId, conversationId);
 		let tools = await executor?.getTools();
 		if (toggleStatus === "on") {
-            const newTool = await this.createCustomTool({ tool, schema: JSON.parse(tool.schema) });
-            tools?.push(newTool);
-			
+			const newTool = await this.createCustomTool({ tool, schema: JSON.parse(tool.schema) });
+			tools?.push(newTool);
+
 			const activeTools = (await executor?.getActiveTools()) as ActiveTools;
 			activeTools[tool.id] = [
 				(tools?.length ? tools.length - 1 : 0),
@@ -46,24 +46,24 @@ export default class ToolsHelper {
 			await executor?.setTools({ tools })
 		}
 
-        return true;
-    }
+		return true;
+	}
 
 	async createCustomTool({ tool, schema }: { tool: Tool, schema: any }) {
 		let zodSchema = z.object({});
 		if (schema.length > 0) {
 			zodSchema = await this.createZodSchema(schema);
 		}
-		
+
 		const newTool = this.customToolHelper(tool, zodSchema);
 		return newTool;
 	}
 
 	async customToolHelper(tool: Tool, zodSchema: any) {
 		const schemaKeys = Object.keys(zodSchema.shape);
-        interface FunctionArgs {
-            [key: string]: any;
-        }
+		interface FunctionArgs {
+			[key: string]: any;
+		}
 		const params = Object.keys(zodSchema.shape).join(',')
 		const compiledFunction = await this.compileFunction(params, tool.code)
 		const newTool = new DynamicStructuredTool({
@@ -75,7 +75,16 @@ export default class ToolsHelper {
 				schemaKeys.forEach(key => {
 					functionArgs[key] = args[key];
 				});
-				return await compiledFunction(require, functionArgs);
+				const imports = async (moduleName: string) => {
+					const modules: { [key: string]: any } = {
+						'axios': await import('axios'),
+					};
+					if (modules[moduleName]) {
+						return modules[moduleName];
+					}
+					throw new Error(`Module ${moduleName} is not allowed or not found`);
+				};
+				return await compiledFunction(imports, functionArgs);
 			},
 		});
 		return newTool;
@@ -95,11 +104,11 @@ export default class ToolsHelper {
 	}
 
 	async createZodSchema(schemaArray: any[]) {
-        interface SchemaObject {
-            [key: string]: z.ZodType;
-        }
+		interface SchemaObject {
+			[key: string]: z.ZodType;
+		}
 		const schemaObject: SchemaObject = {};
-	
+
 		schemaArray.forEach((field: any) => {
 			if (field.type == 'number' && field.optional) {
 				schemaObject[field.name] = z.number().optional().describe(field.description);
@@ -125,13 +134,14 @@ export default class ToolsHelper {
 				throw new Error(`Unsupported type: ${field.type}`);
 			}
 		});
-	
+
 		return z.object(schemaObject);
 	}
 
 	async compileFunction(params: string, code: string) {
-		const compiledFunction = new Function('require', 'args', `
+		const compiledFunction = new Function('imports', 'args', `
 			return (async () => {
+				const require = imports;
 				let result;
 				if (args !== undefined) {
 					const {${params}} = args;
@@ -139,7 +149,6 @@ export default class ToolsHelper {
 				} else {
 					result = await (async function() { ${code} })();
 				}
-				console.log(String(result))
 				return String(result);
 			})();
 		`);

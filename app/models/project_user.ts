@@ -13,7 +13,6 @@ export default class ProjectUser extends BaseModel {
     @column()
     declare role: string;
 
-
     @hasOne(() => Project)
     declare project: HasOne<typeof Project>
   
