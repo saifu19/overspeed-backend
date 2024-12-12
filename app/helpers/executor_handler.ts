@@ -7,7 +7,7 @@ import {
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import { SerpAPI } from "@langchain/community/tools/serpapi";
 import { BufferMemory, ChatMessageHistory } from "langchain/memory";
-import Ws from '#services/ws';
+// import Ws from '#services/ws';
 // import { CallbackHandler } from "langfuse-langchain"
 
 export default class Executor {
@@ -57,60 +57,61 @@ export default class Executor {
                 },
             });
 
-            let stopAnswer = false;
-            let resolvePromise;
+            // let stopAnswer = false;
+            // let resolvePromise;
 
-            const waitForStop = new Promise((resolve) => {
-                resolvePromise = resolve;
-                Ws.io?.once('connection', (socket) => {
-                    const stopListener = (data: any) => {
-                        if (data.executorId === this.executorId) {
-                            stopAnswer = true;
-                            socket.removeListener('stop', stopListener);
-                            resolve("Ready!");
-                        }
-                    };
+            // const waitForStop = new Promise((resolve) => {
+            //     resolvePromise = resolve;
+            //     Ws.io?.once('connection', (socket) => {
+            //         const stopListener = (data: any) => {
+            //             if (data.executorId === this.executorId) {
+            //                 stopAnswer = true;
+            //                 socket.removeListener('stop', stopListener);
+            //                 resolve("Ready!");
+            //             }
+            //         };
 
-                    socket.once('stop', stopListener);
+            //         socket.once('stop', stopListener);
 
-                    function cleanup() {
-                        socket.removeListener('stop', stopListener);
-                        Ws.io?.removeListener('connection', stopListener);
-                    }
+            //         function cleanup() {
+            //             socket.removeListener('stop', stopListener);
+            //             Ws.io?.removeListener('connection', stopListener);
+            //         }
 
-                    waitForStop.catch(() => {
-                        cleanup();
-                    });
-                });
-            });
+            //         waitForStop.catch(() => {
+            //             cleanup();
+            //         });
+            //     });
+            // });
 
-            yield '{FIRST TOKEN}'
+            // yield '{FIRST TOKEN}'
 
-            waitForStop.catch((error) => {
-                console.error(error);
-            });
+            // waitForStop.catch((error) => {
+            //     console.error(error);
+            // });
 
             if (result) {
                 for await (const chunk of result) {
-                    if (stopAnswer) {
-                        yield '{MESSAGE ENDS HERE}';
-                        break;
-                    }
+                    // if (stopAnswer) {
+                    //     yield '{MESSAGE ENDS HERE}';
+                    //     break;
+                    // }
                     if (JSON.stringify(chunk.ops[0].path).trim().includes("/streamed_output_str/-")) {
                         yield chunk.ops[0].value;
                     } else if (JSON.stringify(chunk.ops[0].path).trim() == '"/final_output"') {
                         this.updateMemory({ input: input, output: chunk.ops[0].value.output })
-                        yield 'LAST CHUNK: ' + chunk.ops[0].value.output;
-                    } else if (JSON.stringify(chunk.ops[0].path).trim() == '"/streamed_output/-"') {
-                        this.updateMemory({ input: input, output: chunk.ops[0].value.output })
-                        yield chunk.ops[0].value.output;
+                        // yield 'LAST CHUNK: ' + chunk.ops[0].value.output;
                     }
+                    //  else if (JSON.stringify(chunk.ops[0].path).trim() == '"/streamed_output/-"') {
+                    //     this.updateMemory({ input: input, output: chunk.ops[0].value.output })
+                    //     yield chunk.ops[0].value.output;
+                    // }
 
                 }
                 // yield '{MESSAGE ENDS HERE}';
-                if (!stopAnswer) {
-                    resolvePromise?.("Processing completed without stop signal");
-                }
+                // if (!stopAnswer) {
+                //     resolvePromise?.("Processing completed without stop signal");
+                // }
             }
 
         } catch (error) {

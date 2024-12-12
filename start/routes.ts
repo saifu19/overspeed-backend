@@ -7,6 +7,7 @@ import ProjectController from '#controllers/projects/project_controller'
 import ConversationsController from '#controllers/langchain/conversations_controller';
 import MessagesController from '#controllers/langchain/messages_controller';
 import { middleware } from '#start/kernel'
+import ToolsController from '#controllers/langchain/tools_controller'
 
 
 router.get('/', async (ctx) => {
@@ -59,6 +60,10 @@ router.group(() => {
 
     router.post('/api/messages/send', [MessagesController, 'sendMessage']).as('api.messages.send')
     router.get('/api/messages/:conversationId', [MessagesController, 'getMessages']).as('api.messages.get')
+
+    // Tools Routes
+    router.get('/api/tools', [ToolsController, 'getTools']).as('api.tools.get')
+    router.post('/api/tools', [ToolsController, 'createTool']).as('api.tools.create')
 }).use(middleware.auth({
     guards: ['api']
 }))

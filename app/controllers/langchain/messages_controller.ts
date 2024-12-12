@@ -3,6 +3,7 @@ import ExecutorManager from '#providers/executor_provider/index'
 import { inject } from '@adonisjs/core'
 import Ws from '#services/ws';
 import Message from '#models/message';
+import { sleep } from '#helpers/utils';
 
 @inject()
 export default class MessagesController {
@@ -22,33 +23,60 @@ export default class MessagesController {
             return response.status(500).json({ error: 'Failed to initialize executor' })
         }
 
+        // Start processing in background without awaiting
+        this.processStreamingMessage(
+            executor,
+            message,
+            conversation_id,
+            (user.id).toString(),
+            session
+        ).catch(error => {
+            console.error('Background processing error:', error)
+        })
+
+        // Return immediately with stream start confirmation
+        return response.json({ 
+            status: 'stream_started',
+            conversation_id: conversation_id
+        })
+    }
+
+    // Helper to process message
+    private async processStreamingMessage(executor: any, message: string, conversation_id: string, user_id: string, session: any) {
         const socket = Ws.io
         let ai_message = ''
         
         try {
+            await sleep(1000) // Wait 1 second before starting stream
+
             for await (const chunk of executor.invoke({ 
                 input: message, 
                 session: session, 
-                userId: user.id 
+                userId: user_id 
             })) {
-                console.log(chunk)
                 ai_message += chunk
-                // Emit each chunk through WebSocket
-                socket?.emit('message', {
+                socket?.emit(`message_${conversation_id}`, {
                     conversationId: conversation_id,
                     content: chunk,
-                    userId: user.id
+                    userId: user_id
                 })
             }
 
-            Message.create({
-                conversation_id: conversation_id,
+            socket?.emit(`message_${conversation_id}`, {
+                conversationId: conversation_id,
+                content: "{MESSAGE_ENDS_HERE}",
+                userId: user_id
+            })
+
+            // Create messages after streaming is complete
+            await Message.create({
+                conversation_id: parseInt(conversation_id),
                 content: message,
                 sender: 'user'
             })
 
-            Message.create({
-                conversation_id: conversation_id,
+            await Message.create({
+                conversation_id: parseInt(conversation_id),
                 content: ai_message,
                 sender: 'bot'
             })
@@ -57,10 +85,8 @@ export default class MessagesController {
                 conversationId: conversation_id,
                 error: error.message
             })
-            return response.status(500).json({ error: 'Message processing failed' })
+            console.error('Streaming processing error:', error)
         }
-    
-        return response.json({ status: 'streaming completed' })
     }
 
     async getMessages({ params, response, auth }: HttpContext) {

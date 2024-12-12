@@ -1,33 +1,17 @@
 // import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { z } from 'zod';
 import Tool from '#models/tool';
-import Env from '#start/env'
 import { DynamicStructuredTool } from "langchain/tools";
 import ExecutorManager from '#providers/executor_provider/index';
-import mysql from 'mysql';
 
 interface ActiveTools {
     [key: number]: number[];
 }
 export default class ToolsHelper {
-    mysql: any;
-    connection: any;
-    executorManager: ExecutorManager;
-
-    constructor(executorManager: ExecutorManager) {
-		this.mysql = mysql;
-        this.connection = {
-            host: Env.get('MYSQL_HOST_MM'),
-            user: Env.get('MYSQL_USER_MM'),
-            password: Env.get('MYSQL_PASSWORD_MM'),
-            database: Env.get('MYSQL_DB_NAME_MM')
-        }
-        this.executorManager = executorManager;
-	}
 	
-    async toggleTool({ toggleStatus, toolId, userId, conversationId }: { toggleStatus: string, session: any, toolId: number, userId: number, conversationId: number }) {
+    async toggleTool({ toggleStatus, toolId, userId, conversationId, executorManager }: { toggleStatus: string, toolId: number, userId: number, conversationId: number, executorManager: ExecutorManager }) {
         const tool = await Tool.findOrFail(toolId);
-		const executor = await this.executorManager.getExecutorForUser(userId, conversationId);
+		const executor = await executorManager.getExecutorForUser(userId, conversationId);
 		let tools = await executor?.getTools();
 		if (toggleStatus === "on") {
             const newTool = await this.createCustomTool({ tool, schema: JSON.parse(tool.schema) });
@@ -146,7 +130,6 @@ export default class ToolsHelper {
 	}
 
 	async compileFunction(params: string, code: string) {
-
 		const compiledFunction = new Function('require', 'args', `
 			return (async () => {
 				let result;
