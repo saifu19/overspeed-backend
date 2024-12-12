@@ -10,9 +10,9 @@ export default class extends BaseSchema {
       table.string('description')
       table.string('code')
       table.string('schema')
-      table.boolean('is_active').defaultTo(true)
-      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
-      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
+      table.boolean('is_active')
+      table.timestamp('created_at')
+      table.timestamp('updated_at')
     })
   }
 

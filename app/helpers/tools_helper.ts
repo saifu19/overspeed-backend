@@ -70,21 +70,13 @@ export default class ToolsHelper {
 			name: tool.name,
 			description: tool.description,
 			schema: zodSchema,
-			func: async (args: FunctionArgs) => {
+			func: async (args) => {
 				let functionArgs: FunctionArgs = {};
 				schemaKeys.forEach(key => {
 					functionArgs[key] = args[key];
 				});
-				const imports = async (moduleName: string) => {
-					const modules: { [key: string]: any } = {
-						'axios': await import('axios'),
-					};
-					if (modules[moduleName]) {
-						return modules[moduleName];
-					}
-					throw new Error(`Module ${moduleName} is not allowed or not found`);
-				};
-				return await compiledFunction(imports, functionArgs);
+				const dynamicImport = new Function('specifier', 'return import(specifier)');
+            	return await compiledFunction(dynamicImport, functionArgs);
 			},
 		});
 		return newTool;
@@ -139,15 +131,26 @@ export default class ToolsHelper {
 	}
 
 	async compileFunction(params: string, code: string) {
-		const compiledFunction = new Function('imports', 'args', `
+		const compiledFunction = new Function('dynamicImport', 'args', `
 			return (async () => {
-				const require = imports;
 				let result;
 				if (args !== undefined) {
 					const {${params}} = args;
-					result = await (async function(${params}) { ${code} })(${params});
+					result = await (async function(${params}) { 
+						const require = async (moduleName) => {
+							const module = await dynamicImport(moduleName);
+							return module.default || module;
+						};
+						${code} 
+					})(${params});
 				} else {
-					result = await (async function() { ${code} })();
+					result = await (async function() { 
+						const require = async (moduleName) => {
+							const module = await dynamicImport(moduleName);
+							return module.default || module;
+						};
+						${code} 
+					})();
 				}
 				return String(result);
 			})();

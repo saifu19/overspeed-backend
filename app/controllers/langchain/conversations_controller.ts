@@ -1,5 +1,6 @@
 import Conversation from '#models/conversation'
 import Tool from '#models/tool'
+import Message from '#models/message'
 import ExecutorManager from '#providers/executor_provider/index'
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
@@ -12,23 +13,21 @@ export default class ConversationsController {
         this.toolsHelper = new ToolsHelper()
     }
 
-    async createConversation({ auth, request, response }: HttpContext) {
-        const project = request.body().project_id
+    async createConversation({ auth, response }: HttpContext) {
         const user = auth.user
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
         }
 
         const conversation = await Conversation.create({
-            user_id: user.id,
-            project_id: project
+            user_id: user.id
         })
 
         return response.json({ conversation })
     }
 
-    async prepareConversation({ auth, request, response }: HttpContext) {
-        const { conversationId } = request.only(['conversationId'])
+    async prepareConversation({ auth, params, response }: HttpContext) {
+        const conversationId = params.conversationId
         const user = auth.user
 
         if (!user) {
@@ -54,6 +53,26 @@ export default class ConversationsController {
         await executor.setPrompt(prompt)
         await executor.initExecutor()
 
+        const messages = await Message.query().where('conversation_id', conversation.id)
+        if (messages.length > 0) {
+            let input = ""
+            let output = ""
+            for (const message of messages) {
+                if (message.sender === 'user') {
+                    input += message.content
+                } else {
+                    output += message.content
+                }
+            }
+
+            if (input !== "" && output !== "") {
+                await executor.updateMemory({ input, output })
+                await executor.initExecutor()
+                input = ""
+                output = ""
+            }
+        }
+
         return response.json({ conversation, tools })
     }
 
@@ -66,18 +85,16 @@ export default class ConversationsController {
         return tools
     }
     
-    async getConversations({ auth, response, params }: HttpContext) {
+    async getConversations({ auth, response }: HttpContext) {
         const user = auth.user
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
         }
-        const projectId = params.projectId
-        const conversations = await Conversation.query().where('user_id', user.id).where('project_id', projectId)
+        const conversations = await Conversation.query().where('user_id', user.id)
         return response.json({ conversations })
     }
 
-    async createAndPrepareConversation({ request, response, auth }: HttpContext) {
-        const project = request.body().projectId
+    async createAndPrepareConversation({ response, auth }: HttpContext) {
         const user = auth.user
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
@@ -85,8 +102,7 @@ export default class ConversationsController {
 
         try {
             const conversation = await Conversation.create({
-                user_id: user.id,
-                project_id: project
+                user_id: user.id
             })
 
             const executor = await this.executorManager.getExecutorForUser(user.id, conversation.id)

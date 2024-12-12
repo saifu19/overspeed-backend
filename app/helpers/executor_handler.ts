@@ -46,7 +46,7 @@ export default class Executor {
         this.initExecutor();
     }
 
-    public async *invoke({ input, session, userId }: { input: string, session: any, userId: number }): AsyncGenerator<string> {
+    public async *invoke({ input, session }: { input: string, session: any }): AsyncGenerator<string> {
         try {
             let result;
             result = this.executor?.streamLog({

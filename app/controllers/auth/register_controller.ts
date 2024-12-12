@@ -18,7 +18,6 @@ export default class RegisterController {
 					user: {
 						id: user.id,
 						email: user.email,
-						// Add other user fields you want to send
 					},
 					token: token
 				}
