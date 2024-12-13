@@ -120,7 +120,7 @@ export default class ConversationsController {
 
             return response.status(200).json({ conversation, tools })
         } catch (error) {
-            return response.status(500).json({ error: 'Failed to create and prepare conversation' })
+            return response.status(500).json({ error: 'Failed to create and prepare conversation, ' + error })
         }
     }
 }

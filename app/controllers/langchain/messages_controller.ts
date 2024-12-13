@@ -47,7 +47,7 @@ export default class MessagesController {
         let ai_message = ''
         
         try {
-            await sleep(1000) // Wait 1 second before starting stream
+            await sleep(2000) // Wait 2 seconds before starting stream
 
             for await (const chunk of executor.invoke({ 
                 input: message, 
