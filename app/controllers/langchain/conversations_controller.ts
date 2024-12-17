@@ -39,7 +39,7 @@ export default class ConversationsController {
         if (!conversation) {
             return response.status(404).json({ error: 'Conversation not found' })
         }
-        
+
         const tools = await this.addToolsToConversation(user.id, conversation.id, this.executorManager)
 
         const executor = await this.executorManager.getExecutorForUser(user.id, conversation.id)
@@ -84,7 +84,7 @@ export default class ConversationsController {
         }
         return tools
     }
-    
+
     async getConversations({ auth, response }: HttpContext) {
         const user = auth.user
         if (!user) {

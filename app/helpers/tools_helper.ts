@@ -3,47 +3,50 @@ import { z } from 'zod';
 import Tool from '#models/tool';
 import { DynamicStructuredTool } from "langchain/tools";
 import ExecutorManager from '#providers/executor_provider/index';
+import GraphManager from '#providers/graph_provider/index';
 
 interface ActiveTools {
 	[key: number]: number[];
 }
 export default class ToolsHelper {
-
-	async toggleTool({ toggleStatus, toolId, userId, conversationId, executorManager }: { toggleStatus: string, toolId: number, userId: number, conversationId: number, executorManager: ExecutorManager }) {
+	async toggleTool({ toggleStatus, toolId, userId, conversationId, executorManager, workflowId, graphManager }: { toggleStatus: string, toolId: number, userId: number, conversationId?: number, executorManager?: ExecutorManager, workflowId?: number, graphManager?: GraphManager }) {
 		const tool = await Tool.findOrFail(toolId);
-		const executor = await executorManager.getExecutorForUser(userId, conversationId);
-		let tools = await executor?.getTools();
-		if (toggleStatus === "on") {
-			const newTool = await this.createCustomTool({ tool, schema: JSON.parse(tool.schema) });
-			tools?.push(newTool);
-
-			const activeTools = (await executor?.getActiveTools()) as ActiveTools;
-			activeTools[tool.id] = [
-				(tools?.length ? tools.length - 1 : 0),
-			];
-			await executor?.setActiveTools({ activeTools })
-			tools = tools ? tools : [];
-			await executor?.setTools({ tools })
-			await executor?.initExecutor();
-			return true;
-		} else {
-			const activeTools = (await executor?.getActiveTools()) as ActiveTools;
-			const index = activeTools[tool.id][0];
+		console.log(workflowId, graphManager);
+		if (executorManager && conversationId) {
+			const executor = await executorManager.getExecutorForUser(userId, conversationId);
 			let tools = await executor?.getTools();
-			if (tools) {
-				if (index !== tools?.length - 1) {
-					for (let k in activeTools) {
-						if (activeTools[k][0] > index) {
-							activeTools[k][0] = activeTools[k][0] - 1;
+			if (toggleStatus === "on") {
+				const newTool = await this.createCustomTool({ tool, schema: JSON.parse(tool.schema) });
+				tools?.push(newTool);
+
+				const activeTools = (await executor?.getActiveTools()) as ActiveTools;
+				activeTools[tool.id] = [
+					(tools?.length ? tools.length - 1 : 0),
+				];
+				await executor?.setActiveTools({ activeTools })
+				tools = tools ? tools : [];
+				await executor?.setTools({ tools })
+				await executor?.initExecutor();
+				return true;
+			} else {
+				const activeTools = (await executor?.getActiveTools()) as ActiveTools;
+				const index = activeTools[tool.id][0];
+				let tools = await executor?.getTools();
+				if (tools) {
+					if (index !== tools?.length - 1) {
+						for (let k in activeTools) {
+							if (activeTools[k][0] > index) {
+								activeTools[k][0] = activeTools[k][0] - 1;
+							}
 						}
 					}
 				}
+				delete activeTools[tool.id];
+				await executor?.setActiveTools({ activeTools })
+				tools?.splice(index, 1);
+				tools = tools ? tools : [];
+				await executor?.setTools({ tools })
 			}
-			delete activeTools[tool.id];
-			await executor?.setActiveTools({ activeTools })
-			tools?.splice(index, 1);
-			tools = tools ? tools : [];
-			await executor?.setTools({ tools })
 		}
 
 		return true;
@@ -158,4 +161,12 @@ export default class ToolsHelper {
 
 		return compiledFunction;
 	}
+
+	async getCompiledTool(tool: Tool) {
+		const schema = JSON.parse(tool.schema)
+		const zodSchema = await this.createZodSchema(schema)
+		const newTool = this.customToolHelper(tool, zodSchema)
+		return newTool
+	}
+
 }
