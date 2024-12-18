@@ -63,7 +63,7 @@ export default class WorkflowsController {
         for (const tool of tools) {
             compiledTools.push(await this.toolsHelper.getCompiledTool(tool))
         }
-        const agents = await Agent.query().where('is_active', true)
+        const agents = await Agent.query().where('is_active', true).orderBy('order', 'asc')
 
         for (const agent of agents) {
             await graph.createAgent(

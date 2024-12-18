@@ -17,6 +17,9 @@ export default class Agent extends BaseModel {
   @column()
   declare is_active: boolean
 
+  @column()
+  declare order: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
