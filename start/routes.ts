@@ -9,10 +9,12 @@ import LogoutController from '#controllers/auth/logout_controller'
 import ConversationsController from '#controllers/langchain/conversations_controller'
 import MessagesController from '#controllers/langchain/messages_controller'
 import AgentsController from '#controllers/langgraph/agents_controller'
+import MagicLinkController from '#controllers/auth/magic_links_controller'
 
 router.group(() => {
     router.post('/login', [LoginController, 'handle']).as('api.login')
     router.post('/register', [RegisterController, 'handle']).as('api.register')
+    router.post('/auth/magic-link', [MagicLinkController, 'generate'])
 }).prefix('/api')
 
 router.group(() => {
