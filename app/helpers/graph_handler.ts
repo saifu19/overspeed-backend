@@ -7,6 +7,11 @@ import { Annotation, messagesStateReducer } from "@langchain/langgraph";
 import { MemorySaver } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
+interface GraphState {
+    messages: BaseMessage[];
+    current_agent: string;
+}
+
 // Define state annotation
 const StateAnnotation = Annotation.Root({
     messages: Annotation<BaseMessage[]>({
@@ -18,7 +23,7 @@ const StateAnnotation = Annotation.Root({
 });
 
 export default class GraphHandler {
-    private graph: StateGraph;
+    private graph: StateGraph<typeof StateAnnotation>;
     private prompts: Map<string, ChatPromptTemplate>;
     private agentOrder: string[];
     private modelName: string;
@@ -36,37 +41,47 @@ export default class GraphHandler {
     }
 
     async createAgent(name: string, systemPrompt: string, humanPrompt: string, tools: any[] = []) {
+        if (!name || !systemPrompt || !humanPrompt) {
+            throw new Error("Name, system prompt, and human prompt are required");
+        }
+
         // Create LLM with tools bound
         const llm = new ChatOpenAI({ 
             modelName: this.modelName, 
             streaming: true 
         }).bindTools(tools);
 
-        // Create prompt template
-        const prompt = ChatPromptTemplate.fromMessages([
-            ["system", systemPrompt],
-            new MessagesPlaceholder("messages"),
-            ["human", humanPrompt]
-        ]);
+        try {
+            // Create prompt template
+            const prompt = ChatPromptTemplate.fromMessages([
+                { role: "system", content: systemPrompt },
+                new MessagesPlaceholder("messages"),
+                { role: "human", content: humanPrompt }
+            ]);
 
-        this.prompts.set(name, prompt);
-        this.agentOrder.push(name);
+            this.prompts.set(name, prompt);
+            this.agentOrder.push(name);
 
-        // Create node function that calls the model
-        const nodeFunction = async (state: typeof StateAnnotation.State) => {
-            const result = await llm.invoke(
-                await prompt.format({
-                    messages: state.messages
-                })
-            );
+            // Create node function that calls the model
+            const nodeFunction = async (state: GraphState) => {
+                const result = await llm.invoke(
+                    await prompt.format({
+                        messages: state.messages
+                    })
+                );
 
-            return {
-                messages: [result],
-                current_agent: name
+                return {
+                    messages: [result],
+                    current_agent: name
+                };
             };
-        };
 
-        this.graph.addNode(name, nodeFunction);
+            this.graph.addNode(name, nodeFunction);
+            console.log(`Successfully created agent: ${name}`);
+        } catch (error) {
+            console.error('Error creating agent:', error);
+            throw new Error(`Failed to create agent ${name}: ${error.message}`);
+        }
     }
 
     // Function to determine if we should route to tools

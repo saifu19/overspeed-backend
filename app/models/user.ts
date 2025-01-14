@@ -1,43 +1,20 @@
-import { DateTime } from 'luxon'
-import hash from '@adonisjs/core/services/hash'
-import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
-import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
-import { AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
-// import type { ManyToMany } from '@adonisjs/lucid/types/relations';
-// import Project from './project.js'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
-const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email'],
-  passwordColumnName: 'password',
-})
-
-export default class User extends compose(BaseModel, AuthFinder) {
-  @column({ isPrimary: true })
-  declare id: number
-
-  @column()
-  declare name: string | null
-
-  @column()
+export default class User {
+  declare id: string  // Supabase UUID
   declare email: string
+  declare created_at: string
+  declare updated_at: string
 
-  @column({ serializeAs: null })
-  declare password: string
+  constructor(supabaseUser: SupabaseUser) {
+    this.id = supabaseUser.id
+    this.email = supabaseUser.email!
+    this.created_at = supabaseUser.created_at
+    this.updated_at = supabaseUser.updated_at ?? new Date().toISOString()
+  }
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
-
-  currentAccessToken?: AccessToken
-
-  static accessTokens = DbAccessTokensProvider.forModel(User, {
-    expiresIn: '30 days',
-    prefix: 'oat_',
-    table: 'auth_access_tokens',
-    type: 'auth_token',
-    tokenSecretLength: 40,
-  })
+  // Static method to create User instance from Supabase user
+  static fromSupabaseUser(supabaseUser: SupabaseUser): User {
+    return new User(supabaseUser)
+  }
 }

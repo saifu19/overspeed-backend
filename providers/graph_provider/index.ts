@@ -12,15 +12,23 @@ export default class GraphManager {
         return GraphManager.instance
     }
 
-    public async getGraphForUser(userId: number, conversation_id: number) {
+    public async getGraphForUser(userId: string | number, workflowId: number) {
         let didExist = false
-        const graphId = (userId.toString() + "-" + conversation_id.toString())
+        const graphId = `${userId}-${workflowId}`
+        
         if (!this.graphs.has(graphId)) {
-            this.graphs.set(graphId, new GraphHandler())
-            this.graphs.get(graphId)?.setGraphId(graphId)
+            const handler = new GraphHandler()
+            handler.setGraphId(graphId)
+            this.graphs.set(graphId, handler)
         } else {
             didExist = true
         }
-        return { graph: this.graphs.get(graphId), didExist }
+        
+        const graph = this.graphs.get(graphId)
+        if (!graph) {
+            throw new Error(`Failed to initialize graph for user ${userId} and workflow ${workflowId}`)
+        }
+        
+        return { graph, didExist }
     }
 }

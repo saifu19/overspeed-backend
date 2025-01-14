@@ -3,15 +3,14 @@ import { z } from 'zod';
 import Tool from '#models/tool';
 import { DynamicStructuredTool } from "langchain/tools";
 import ExecutorManager from '#providers/executor_provider/index';
-import GraphManager from '#providers/graph_provider/index';
+// import GraphManager from '#providers/graph_provider/index';
 
 interface ActiveTools {
 	[key: number]: number[];
 }
 export default class ToolsHelper {
-	async toggleTool({ toggleStatus, toolId, userId, conversationId, executorManager, workflowId, graphManager }: { toggleStatus: string, toolId: number, userId: number, conversationId?: number, executorManager?: ExecutorManager, workflowId?: number, graphManager?: GraphManager }) {
+	async toggleTool({ toggleStatus, toolId, userId, conversationId, executorManager /** , workflowId, graphManager */ }: { toggleStatus: string, toolId: number, userId: string, conversationId?: number, executorManager?: ExecutorManager /** , workflowId?: number, graphManager?: GraphManager  */ }) {
 		const tool = await Tool.findOrFail(toolId);
-		console.log(workflowId, graphManager);
 		if (executorManager && conversationId) {
 			const executor = await executorManager.getExecutorForUser(userId, conversationId);
 			let tools = await executor?.getTools();

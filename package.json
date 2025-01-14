@@ -63,6 +63,8 @@
     "@adonisjs/vite": "^3.0.0",
     "@langchain/community": "^0.3.15",
     "@langchain/langgraph": "^0.2.33",
+    "@supabase/gotrue-js": "^2.67.3",
+    "@supabase/supabase-js": "^2.47.12",
     "@vinejs/vine": "^2.1.0",
     "edge.js": "^6.0.2",
     "langchain": "^0.3.6",

@@ -9,7 +9,7 @@ export default class Workflow extends BaseModel {
   declare id: number
 
   @column()
-  declare user_id: number
+  declare user_id: string
 
   @column()
   declare name: string

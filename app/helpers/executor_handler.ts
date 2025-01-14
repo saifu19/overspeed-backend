@@ -167,7 +167,6 @@ export default class Executor {
     }
 
     public getPrompt() {
-        console.log(this.promptString)
         return this.promptString;
     }
 
@@ -177,7 +176,6 @@ export default class Executor {
 
     public async setModel({ modelName }: { modelName: string }) {
         this.modelName = modelName;
-        console.log(this.modelName)
     }
 
     public async getModel() {

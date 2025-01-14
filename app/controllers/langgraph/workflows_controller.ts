@@ -18,8 +18,8 @@ export default class WorkflowsController {
         this.toolsHelper = new ToolsHelper()
     }
 
-    async createWorkflow({ auth, request, response }: HttpContext) {
-        const user = auth.user
+    async createWorkflow(ctx: HttpContext) {
+        const { request, response, user } = ctx
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
         }
@@ -35,9 +35,9 @@ export default class WorkflowsController {
         return response.json({ workflow })
     }
 
-    async prepareWorkflow({ auth, params, response }: HttpContext) {
+    async prepareWorkflow(ctx: HttpContext) {
+        const { params, response, user } = ctx
         const workflowId = params.workflowId
-        const user = auth.user
 
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
@@ -58,23 +58,65 @@ export default class WorkflowsController {
     }
 
     private async initializeGraphAgents(graph: any) {
-        const tools = await this.addToolsToWorkflow()
-        let compiledTools = []
-        for (const tool of tools) {
-            compiledTools.push(await this.toolsHelper.getCompiledTool(tool))
-        }
-        const agents = await Agent.query().where('is_active', true).orderBy('order', 'asc')
+        try {
+            const tools = await Tool.query().where('is_active', true)
+            if (!tools || tools.length === 0) {
+                return
+            }
 
-        for (const agent of agents) {
-            await graph.createAgent(
-                agent.name,
-                agent.system_prompt,
-                agent.human_prompt,
-                compiledTools
+            const compiledTools = await Promise.all(
+                tools.map(async tool => {
+                    try {
+                        const compiledTool = await this.toolsHelper.getCompiledTool(tool)
+                        return compiledTool
+                    } catch (error) {
+                        return null
+                    }
+                })
             )
-        }
 
-        await graph.buildGraph(compiledTools)
+            const validTools = compiledTools.filter(tool => tool !== null)
+
+            // Query agents and validate their data
+            const agents = await Agent.query()
+                .where('is_active', true)
+                .whereNotNull('name')
+                .whereNotNull('system_prompt')
+                .whereNotNull('human_prompt')
+                .orderBy('order', 'asc')
+
+            if (!agents || agents.length === 0) {
+                return
+            }
+
+            // Additional validation of agent data
+            const validAgents = agents.filter(agent => 
+                agent.name?.trim() && 
+                agent.system_prompt?.trim() && 
+                agent.human_prompt?.trim()
+            )
+
+            if (validAgents.length === 0) {
+                return
+            }
+
+            for (const agent of validAgents) {
+                try {
+                    await graph.createAgent(
+                        agent.name,
+                        agent.system_prompt,
+                        agent.human_prompt,
+                        validTools
+                    )
+                } catch (error) {
+                    throw error
+                }
+            }
+
+            await graph.buildGraph(validTools)
+        } catch (error) {
+            throw new Error(`Failed to initialize graph agents: ${error.message}`)
+        }
     }
 
     private async restoreGraphState(graph: any, states: WorkflowState[]) {
@@ -83,16 +125,35 @@ export default class WorkflowsController {
         }
     }
 
-    async addToolsToWorkflow() {
-        const tools = await Tool.query().where('is_active', true)
-        for (const tool of tools) {
-            await this.toolsHelper.getCompiledTool(tool)
-        }
-        return tools
-    }
+    // private async addToolsToWorkflow() {
+    //     try {
+    //         const tools = await Tool.query().where('is_active', true)
+    //         if (!tools || tools.length === 0) {
+    //             console.log('No active tools found')
+    //             return []
+    //         }
 
-    async getWorkflows({ auth, response }: HttpContext) {
-        const user = auth.user
+    //         console.log('Found active tools:', tools.length)
+    //         const compiledTools = await Promise.all(
+    //             tools.map(async tool => {
+    //                 try {
+    //                     return await this.toolsHelper.getCompiledTool(tool)
+    //                 } catch (error) {
+    //                     console.error(`Failed to compile tool ${tool.id}:`, error)
+    //                     return null
+    //                 }
+    //             })
+    //         )
+
+    //         return compiledTools.filter(tool => tool !== null)
+    //     } catch (error) {
+    //         console.error('Failed to get tools:', error)
+    //         throw new Error(`Failed to get tools: ${error.message}`)
+    //     }
+    // }
+
+    async getWorkflows(ctx: HttpContext) {
+        const { response, user } = ctx
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
         }
@@ -101,8 +162,8 @@ export default class WorkflowsController {
         return response.json({ workflows })
     }
 
-    async createAndPrepareWorkflow({ request, response, auth }: HttpContext) {
-        const user = auth.user
+    async createAndPrepareWorkflow(ctx: HttpContext) {
+        const { request, response, user } = ctx
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
         }
@@ -129,29 +190,30 @@ export default class WorkflowsController {
         }
     }
 
-    async prepareGraphHelper(user: User, workflow: Workflow) {
-        const { graph, didExist } = await this.graphManager.getGraphForUser(user.id, workflow.id)
+    async prepareGraphHelper(user: any, workflow: Workflow) {
+        try {
+            const { graph, didExist } = await this.graphManager.getGraphForUser(user.id, workflow.id)
 
-        if (!graph) {
-            throw new Error('Failed to initialize graph')
-        }
+            const states = await WorkflowState.query()
+                .where('workflow_id', workflow.id)
+                .orderBy('created_at', 'asc')
 
-        const states = await WorkflowState.query()
-            .where('workflow_id', workflow.id)
-            .orderBy('created_at', 'asc')
-
-        if (!didExist) {
-            await this.initializeGraphAgents(graph)
-            if (states.length > 0) {
-                await this.restoreGraphState(graph, states)
+            if (!didExist) {
+                await this.initializeGraphAgents(graph)
+                if (states.length > 0) {
+                    await this.restoreGraphState(graph, states)
+                }
             }
-        }
 
-        return { graph, states }
+            return { graph, states }
+        } catch (error) {
+            console.error('Failed to prepare graph:', error)
+            throw new Error(`Failed to prepare graph: ${error.message}`)
+        }
     }
 
-    async processWorkflowStep({ auth, params, request, response }: HttpContext) {
-        const user = auth.user
+    async processWorkflowStep(ctx: HttpContext) {
+        const { user, params, request, response } = ctx
         const { workflowId } = params
         const { input } = request.body()
 

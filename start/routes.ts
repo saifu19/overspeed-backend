@@ -17,56 +17,43 @@ router.group(() => {
     router.post('/auth/magic-link', [MagicLinkController, 'generate'])
 }).prefix('/api')
 
-router.group(() => {
-    router.post('/logout/:id', [LogoutController, 'handle']).as('api.logout')
+// Supabase Auth Routes (unprotected)
+router.post('auth/supabase/magic-link', '#controllers/auth/supabase_auth_controller.sendMagicLink')
+router.post('auth/supabase/verify', '#controllers/auth/supabase_auth_controller.verifySession')
 
-    // Langchain Routes
-    router.post('/conversations', [ConversationsController, 'createConversation']).as('api.conversations.create')
-    router.get('/conversations/prepare/:conversationId', [ConversationsController, 'prepareConversation']).as('api.conversations.prepare')
-    router.post('/conversations/create-and-prepare', [ConversationsController, 'createAndPrepareConversation']).as('api.conversations.createAndPrepare')
-    router.get('/conversations', [ConversationsController, 'getConversations']).as('api.conversations.get')
+// Protected Routes Group
+router.group(() => {
+    // Conversation Routes
+    router.post('/conversations', [ConversationsController, 'createConversation'])
+    router.get('/conversations/prepare/:conversationId', [ConversationsController, 'prepareConversation'])
+    router.post('/conversations/create-and-prepare', [ConversationsController, 'createAndPrepareConversation'])
+    router.get('/conversations', [ConversationsController, 'getConversations'])
 
     // Messages Routes
-    router.post('/messages/send', [MessagesController, 'sendMessage']).as('api.messages.send')
-    router.get('/messages/:conversationId', [MessagesController, 'getMessages']).as('api.messages.get')
+    router.post('/messages/send', [MessagesController, 'sendMessage'])
+    router.get('/messages/:conversationId', [MessagesController, 'getMessages'])
 
     // Tools Routes
-    router.get('/tools', [ToolsController, 'getTools']).as('api.tools.get')
-    router.post('/tools', [ToolsController, 'createTool']).as('api.tools.create')
+    router.get('/tools', [ToolsController, 'getTools'])
+    router.post('/tools', [ToolsController, 'createTool'])
 
     // Agents Routes
-    router.get('/agents', [AgentsController, 'getAgents']).as('api.agents.get')
-    router.post('/agents', [AgentsController, 'createAgent']).as('api.agents.create')
-    router.get('/agents/:id', [AgentsController, 'getAgent']).as('api.agents.getById')
-    router.put('/agents/:id', [AgentsController, 'updateAgent']).as('api.agents.update')
-    router.delete('/agents/:id', [AgentsController, 'deleteAgent']).as('api.agents.delete')
-    router.post('/agents/:id/toggle', [AgentsController, 'toggleAgent']).as('api.agents.toggle')
-    router.post('/agents/reorder', [AgentsController, 'reorderAgents']).as('api.agents.reorder')
+    router.get('/agents', [AgentsController, 'getAgents'])
+    router.post('/agents', [AgentsController, 'createAgent'])
+    router.get('/agents/:id', [AgentsController, 'getAgent'])
+    router.put('/agents/:id', [AgentsController, 'updateAgent'])
+    router.delete('/agents/:id', [AgentsController, 'deleteAgent'])
+    router.post('/agents/:id/toggle', [AgentsController, 'toggleAgent'])
+    router.post('/agents/reorder', [AgentsController, 'reorderAgents'])
 
     // Workflow Routes
-    // Basic CRUD operations
     router.post('/workflows', [WorkflowsController, 'createWorkflow'])
-        .as('api.workflows.create')
-
     router.get('/workflows', [WorkflowsController, 'getWorkflows'])
-        .as('api.workflows.get')
-
     router.get('/workflows/:workflowId', [WorkflowsController, 'prepareWorkflow'])
-        .as('api.workflows.prepare')
-
     router.post('/workflows/create-and-prepare', [WorkflowsController, 'createAndPrepareWorkflow'])
-        .as('api.workflows.createAndPrepare')
-
-    // Workflow execution
     router.post('/workflows/:workflowId/process', [WorkflowsController, 'processWorkflowStep'])
-        .as('api.workflows.process')
-
-    // Workflow States
     router.get('/workflows/:workflowId/states', [WorkflowStatesController, 'getStates'])
-        .as('api.workflows.states.get')
-
     router.post('/workflows/:workflowId/states', [WorkflowStatesController, 'createState'])
-        .as('api.workflows.states.create')
-}).use(middleware.auth({
-    guards: ['api']
-})).prefix('/api')
+})
+.use(middleware.supabaseAuth())
+.prefix('/api')

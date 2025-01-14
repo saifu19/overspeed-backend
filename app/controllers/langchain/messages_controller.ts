@@ -10,9 +10,10 @@ export default class MessagesController {
 
     constructor(protected executorManager: ExecutorManager) {}
 
-    async sendMessage({ auth, request, response, session }: HttpContext) {
+    async sendMessage(ctx: HttpContext) {
+        const { request, response, session } = ctx
         const { message, conversation_id } = request.only(['message', 'conversation_id'])
-        const user = auth.user
+        const user = ctx.user
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
         }
@@ -89,9 +90,9 @@ export default class MessagesController {
         }
     }
 
-    async getMessages({ params, response, auth }: HttpContext) {
+    async getMessages(ctx: HttpContext) {
+        const { params, response, user } = ctx
         const conversationId = params.conversationId
-        const user = auth.user
         if (!user) {
             return response.status(401).json({ error: 'Unauthorized' })
         }

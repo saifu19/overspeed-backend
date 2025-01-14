@@ -74,7 +74,6 @@ export default class ToolsController {
         tool.code = request.input('code');
         tool.is_active = true;
 
-        console.log("Tool time");
         const propertyNames = request.input('property_name');
         const propertyTypes = request.input('property_type');
         const propertyDescriptions = request.input('property_description');
