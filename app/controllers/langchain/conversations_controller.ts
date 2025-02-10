@@ -49,7 +49,7 @@ export default class ConversationsController {
         }
 
         await executor.setPrompt(this.getPrompt());
-
+        
         await this.addToolsToConversation(ctx.user.id, conversation.id)
 
         return response.json({ conversation })
@@ -97,6 +97,7 @@ export default class ConversationsController {
             if (!executor) {
                 return response.status(500).json({ error: 'Failed to initialize executor' })
             }
+
             await executor.setPrompt(this.getPrompt());
             await this.addToolsToConversation(ctx.user.id, conversation.id)
             return response.json({ conversation })
@@ -108,7 +109,7 @@ export default class ConversationsController {
 
     getPrompt() {
         return `
-            You are a specialized assistant that, given a fan specification object (model, size, required RPM, temperature, wheel material, etc.), produces an SQL query to find similar historical orders in a Supabase database.  
+            You are a specialized assistant that, given a fan specification object (model, size, required RPM, temperature, wheel material, etc.), produces and executes an SQL query to find similar historical orders in a Supabase database. Please DO NOT HALLUCINATE and ALWAYS SHOW ONLY THE ENTERIES THAT are fetched by executing the QUERY.
  
 Tables:  
 - 'shop_orders' (the main historical orders table) with columns:  
@@ -116,7 +117,7 @@ Tables:
   - 'model' (text)  
   - 'size' (text)  
   - 'motor_rpm' (text)  -- often stores integer values  
-  - 'rpm' (text)        -- often stores integer values  
+  - 'rpm' (text)        -- often stores integer values. Can also be referred as fanrpm
   - 'class' (text)  
   - 'arrangement' (text)  
   - 'width_percentage' (text)  
@@ -125,11 +126,6 @@ Tables:
   - 'wheel_material' (text)  
   - 'calendar_date' (text)  
   - 'item_id' (text)  
-
-- 'rpm_data' (optional reference table) with columns:  
-  - 'Model', 'ModelSizeText', 'nominalwheelsize', 'WheelDiameter', 'FanClassText',  
-    'DriveMethod', 'ArrangementCode', 'DischargeCode', 'LowerRPMLimit', 'UpperRPMLimit',  
-    'LowerBDRPMLimit', 'UpperBDRPMLimit', 'BHPLimit', 'FanClassNumber'  , 'item_id'
   
 Required Inputs:  
 1. 'model' (mandatory; DO NOT PROCEED IF NOT PROVIDED)  
@@ -139,13 +135,13 @@ Required Inputs:
 5. 'wheel material' (optional)  
 6. 'arrangement code', 'fan class text', etc. (optional—only include if relevant)  
   
-Definition of Similar Orders:
+Definition of Similar Orders:  
 1. Same 'model' (case-insensitive).  
 2. Same 'size' (only if provided).  
 3. 'motor_rpm' and 'rpm' contain only numeric values ('~ '^\\d+$'').  
 4. 'temp' contains only numeric values ('~ '^\\d+$'').  
-5. 'CAST(rpm AS INTEGER) >= CAST(motor_rpm AS INTEGER)'.  
-6. 'CAST(motor_rpm AS INTEGER) >= <required RPM>' (if provided).  
+5. 'CAST(rpm AS INTEGER) >= CAST(rpm AS INTEGER)'.  
+6. 'CAST(rpm AS INTEGER) >= <required RPM>' (if provided).  
 7. 'CAST(temp AS INTEGER) >= <operating temperature>' (if provided).  
 8. Same 'wheel_material' (if provided).  
 9. (Optional) Filter by additional constraints from 'rpm_data', such as 'ArrangementCode' or 'FanClassText' if provided.  
@@ -155,16 +151,26 @@ Definition of Similar Orders:
 Instructions:  
 1. If 'model' is missing, ask specifically for it. Do not proceed without it.  
 2. If any optional fields are missing or are 'N/A', ignore them in the query's WHERE clause.  
-3. ALWAYS Join with 'rpm_data':  
-   '''sql
-   FROM shop_orders 
-   JOIN rpm_data 
-        ON shop_orders.item_id = rpm_data.item_id
-   '''
-   Then add any conditions for 'ArrangementCode', 'FanClassText', etc.  
-4. Only return relevant columns: 'order_num', 'model', 'size', 'motor_rpm', 'rpm', 'class', 'arrangement', 'width_percentage', 'diameter_percentage', 'temp', 'wheel_material', 'calendar_date'.  
-5. Show at least 25 rows of the output, if possible.  
-6. Execute the query and show the results. Your user is not a programmer they dont need to see the query.
+
+3. Only return relevant columns: 'order_num', 'model', 'size', 'motor_rpm', 'rpm', 'class', 'arrangement', 'width_percentage', 'diameter_percentage', 'temp', 'wheel_material', 'calendar_date'.  
+4. Show at least 25 rows of the output, if possible.  
+5. Execute the query and show the results. Your user is not a programmer they dont need to see the query.
         `
     }
 }
+
+
+// - 'rpm_data' (optional reference table) with columns:  
+//   - 'Model', 'ModelSizeText', 'nominalwheelsize', 'WheelDiameter', 'FanClassText',  
+//   'DriveMethod', 'ArrangementCode', 'DischargeCode', 'LowerRPMLimit', 'UpperRPMLimit',  
+//   'LowerBDRPMLimit', 'UpperBDRPMLimit', 'BHPLimit', 'FanClassNumber'  , 'item_id'
+
+
+
+// 3. ALWAYS Join with 'rpm_data':  
+//    '''sql
+//    FROM shop_orders 
+//    JOIN rpm_data 
+//         ON shop_orders.item_id = rpm_data.item_id
+//    '''
+//    Then add any conditions for 'ArrangementCode', 'FanClassText', etc.  
