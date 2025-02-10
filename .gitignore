@@ -3,6 +3,8 @@ node_modules
 build
 tmp
 
+config/cors.ts
+
 # Secrets
 .env
 .env.local
