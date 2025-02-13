@@ -9,11 +9,6 @@ export default class extends BaseSchema {
       this.schema.dropTable('auth_access_tokens')
     }
 
-    // Drop the users table as we'll use Supabase for user management
-    if (await this.schema.hasTable('users')) {
-      this.schema.dropTable('users')
-    }
-
     // Modify conversations table
     this.schema.alterTable('conversations', (table) => {
       table.uuid('user_id_uuid').notNullable()
@@ -35,6 +30,11 @@ export default class extends BaseSchema {
     this.schema.alterTable('workflows', (table) => {
       table.renameColumn('user_id_uuid', 'user_id')
     })
+
+    // Drop the users table as we'll use Supabase for user management
+    if (await this.schema.hasTable('users')) {
+      this.schema.dropTable('users')
+    }
   }
 
   async down() {
