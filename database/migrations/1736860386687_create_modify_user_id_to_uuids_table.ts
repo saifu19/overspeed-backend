@@ -14,6 +14,7 @@ export default class extends BaseSchema {
       table.uuid('user_id_uuid').notNullable()
     })
     this.schema.alterTable('conversations', (table) => {
+      table.dropForeign('user_id')
       table.dropColumn('user_id')
     })
     this.schema.alterTable('conversations', (table) => {
@@ -25,6 +26,7 @@ export default class extends BaseSchema {
       table.uuid('user_id_uuid').notNullable()
     })
     this.schema.alterTable('workflows', (table) => {
+      table.dropForeign('user_id')
       table.dropColumn('user_id')
     })
     this.schema.alterTable('workflows', (table) => {
