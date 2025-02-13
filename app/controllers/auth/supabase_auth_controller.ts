@@ -44,6 +44,8 @@ export default class SupabaseAuthController {
         try {
             const { data: { user: supabaseUser }, error } = await this.supabase.auth.getUser(access_token)
 
+            console.log('supabaseUser', supabaseUser)
+
             if (error || !supabaseUser) {
                 return response.status(401).json({
                     status: 'error',
@@ -52,13 +54,15 @@ export default class SupabaseAuthController {
             }
 
             const user = User.fromSupabaseUser(supabaseUser)
-
+            console.log('user', user)
+            console.log("Logged in")
             return response.json({
                 status: 'success',
                 user,
                 tokens: { access_token, refresh_token }
             })
         } catch (error) {
+            console.log('error', error)
             return response.status(500).json({
                 status: 'error',
                 message: 'Failed to verify session',
