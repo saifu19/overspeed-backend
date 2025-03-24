@@ -9,6 +9,7 @@ import ConversationsController from '#controllers/langchain/conversations_contro
 import MessagesController from '#controllers/langchain/messages_controller'
 import AgentsController from '#controllers/langgraph/agents_controller'
 import MagicLinkController from '#controllers/auth/magic_links_controller'
+import LogsController from '#controllers/logs_controller'
 
 router.group(() => {
     router.post('/login', [LoginController, 'handle']).as('api.login')
@@ -53,6 +54,12 @@ router.group(() => {
     router.post('/workflows/:workflowId/process', [WorkflowsController, 'processWorkflowStep'])
     router.get('/workflows/:workflowId/states', [WorkflowStatesController, 'getStates'])
     router.post('/workflows/:workflowId/states', [WorkflowStatesController, 'createState'])
+
+    // Logs Routes
+    router.post('/logs/calculation', [LogsController, 'logCalculation'])
+    router.get('/logs/calculations', [LogsController, 'getRecentLogs'])
+    // router.get('/logs/user/:userId', [LogsController, 'getUserLogs'])
+    router.get('/logs/feedback/:feedbackId', [LogsController, 'getFeedbackStats'])
 })
 .use(middleware.supabaseAuth())
 .prefix('/api')

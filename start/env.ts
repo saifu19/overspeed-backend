@@ -37,5 +37,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_DATABASE: Env.schema.string(),
 
   SERPAPI_API_KEY: Env.schema.string(),
-  OPENAI_API_KEY: Env.schema.string()
+  OPENAI_API_KEY: Env.schema.string(),
+
+  // Vercel KV Configuration
+  KV_REST_API_URL: Env.schema.string(),
+  KV_REST_API_TOKEN: Env.schema.string(),
 })
