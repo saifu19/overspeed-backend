@@ -10,7 +10,7 @@ import MessagesController from '#controllers/langchain/messages_controller'
 import AgentsController from '#controllers/langgraph/agents_controller'
 import MagicLinkController from '#controllers/auth/magic_links_controller'
 import LogsController from '#controllers/logs_controller'
-
+import DatabaseController from '#controllers/database_controller'
 router.group(() => {
     router.post('/login', [LoginController, 'handle']).as('api.login')
     router.post('/register', [RegisterController, 'handle']).as('api.register')
@@ -60,6 +60,11 @@ router.group(() => {
     router.get('/logs/calculations', [LogsController, 'getRecentLogs'])
     // router.get('/logs/user/:userId', [LogsController, 'getUserLogs'])
     router.get('/logs/feedback/:feedbackId', [LogsController, 'getFeedbackStats'])
+    
+    // Database Routes
+    router.get('/database/models', [DatabaseController, 'getUniqueModels'])
+    router.get('/database/sizes', [DatabaseController, 'getUniqueSizes'])
+    router.get('/database/rpm-limit', [DatabaseController, 'getUpperRPMLimitAndDiameter'])
 })
 .use(middleware.supabaseAuth())
 .prefix('/api')
