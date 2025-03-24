@@ -18,6 +18,7 @@ export default class LogsController {
         try {
             const logData = request.body()
             const hasFeedback = !!logData.calculation.feedback
+            const hasComments = !!logData.calculation.comments
 
             const logId = logData.logId || `calc_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
 
@@ -26,9 +27,13 @@ export default class LogsController {
 
                 if (existingLog) {
                     if (typeof existingLog === 'object' && existingLog !== null && 'calculation' in existingLog) {
-                        const typedLog = existingLog as { calculation: { feedback?: string } };
+                        const typedLog = existingLog as { calculation: { feedback?: string, comments?: string } };
 
                         typedLog.calculation.feedback = logData.calculation.feedback;
+
+                        if (hasComments) {
+                            typedLog.calculation.comments = logData.calculation.comments;
+                        }
 
                         await this.kv.set(logId, typedLog);
 
@@ -36,6 +41,14 @@ export default class LogsController {
                             score: Date.now(),
                             member: logId
                         });
+
+                        // If there are comments, add to comments-specific logs
+                        if (hasComments) {
+                            await this.kv.zadd(`comments_logs:${logData.calculation.feedback}`, {
+                                score: Date.now(),
+                                member: logId
+                            });
+                        }
 
                         return response.status(200).json({
                             success: true,
@@ -68,6 +81,14 @@ export default class LogsController {
                     score: Date.now(),
                     member: logId
                 })
+                
+                // If there are comments with feedback, add to comments-specific logs
+                if (hasComments) {
+                    await this.kv.zadd(`comments_logs:${logData.calculation.feedback}`, {
+                        score: Date.now(),
+                        member: logId
+                    });
+                }
             }
 
             return response.status(200).json({
@@ -188,6 +209,65 @@ export default class LogsController {
             return response.status(500).json({
                 success: false,
                 message: 'Failed to fetch feedback statistics',
+                error: error.message
+            })
+        }
+    }
+
+    /**
+     * Get logs with specific feedback type
+     */
+    async getFeedbackLogs({ request, response, params }: HttpContext) {
+        try {
+            const { feedbackType } = params
+            const { limit = 50, offset = 0 } = request.qs()
+
+            if (!['positive', 'negative'].includes(feedbackType)) {
+                return response.status(400).json({
+                    success: false,
+                    message: 'Invalid feedback type. Must be "positive" or "negative"'
+                })
+            }
+
+            // Get the feedback log IDs
+            const logIds = await this.kv.zrange(`feedback_logs:${feedbackType}`, offset, offset + limit - 1, {
+                rev: true // Reverse order to get newest first
+            })
+
+            // Fetch the actual log data for each ID
+            const logs = await Promise.all(
+                logIds.map(async (id) => {
+                    const log = await this.kv.get(id as string)
+                    // Check if log is an object before spreading
+                    return { id, ...(typeof log === 'object' && log !== null ? log : {}) }
+                })
+            )
+
+            // Filter logs to include only those with comments
+            const logsWithComments = logs.filter(log => 
+                log && 
+                typeof log === 'object' && 
+                'calculation' in log && 
+                typeof log.calculation === 'object' && 
+                log.calculation !== null && 
+                'comments' in log.calculation && 
+                log.calculation.comments
+            )
+
+            return response.status(200).json({
+                success: true,
+                feedbackType,
+                logs,
+                logsWithComments,
+                count: logs.length,
+                commentsCount: logsWithComments.length,
+                total: await this.kv.zcard(`feedback_logs:${feedbackType}`)
+            })
+        } catch (error) {
+            console.error(`Error fetching logs for feedback type:`, error)
+            return response.status(500).json({
+                success: false,
+                message: 'Failed to fetch feedback logs',
                 error: error.message
             })
         }
