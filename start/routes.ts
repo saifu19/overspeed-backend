@@ -60,6 +60,7 @@ router.group(() => {
     router.get('/logs/calculations', [LogsController, 'getRecentLogs'])
     // router.get('/logs/user/:userId', [LogsController, 'getUserLogs'])
     router.get('/logs/feedback/:feedbackId', [LogsController, 'getFeedbackStats'])
+    // router.delete('/logs/:logId', [LogsController, 'deleteLog'])
     
     // Database Routes
     router.get('/database/models', [DatabaseController, 'getUniqueModels'])

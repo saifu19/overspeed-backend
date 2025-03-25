@@ -107,14 +107,12 @@ export default class LogsController {
     }
 
     /**
-     * Get recent calculation logs
+     * Get all calculation logs
      */
-    async getRecentLogs({ request, response }: HttpContext) {
+    async getRecentLogs({ response }: HttpContext) {
         try {
-            const { limit = 50, offset = 0 } = request.qs()
-
-            // Get the most recent log IDs
-            const logIds = await this.kv.zrange('calculation_logs', offset, offset + limit - 1, {
+            // Get all log IDs in reverse chronological order
+            const logIds = await this.kv.zrange('calculation_logs', 0, -1, {
                 rev: true // Reverse order to get newest first
             })
 
@@ -130,8 +128,7 @@ export default class LogsController {
             return response.status(200).json({
                 success: true,
                 logs,
-                count: logs.length,
-                total: await this.kv.zcard('calculation_logs')
+                total: logs.length
             })
         } catch (error) {
             console.error('Error fetching calculation logs:', error)
@@ -272,4 +269,61 @@ export default class LogsController {
             })
         }
     }
+
+    // async deleteLog({ params, response }: HttpContext) {
+    //     try {
+    //         const { logId } = params
+            
+    //         if (!logId) {
+    //             return response.status(400).json({
+    //                 success: false,
+    //                 message: 'Log ID is required'
+    //             })
+    //         }
+            
+    //         // First, get the log to check if it exists and get its metadata
+    //         const log = await this.kv.get(logId)
+            
+    //         if (!log) {
+    //             return response.status(404).json({
+    //                 success: false,
+    //                 message: 'Log not found'
+    //             })
+    //         }
+            
+    //         // Delete the log from the main storage
+    //         await this.kv.del(logId)
+            
+    //         // Remove from calculation_logs sorted set
+    //         await this.kv.zrem('calculation_logs', logId)
+            
+    //         // If the log has user info, remove from user_logs
+    //         if (log && typeof log === 'object' && log.user && log.user !== 'anonymous') {
+    //             await this.kv.zrem(`user_logs:${log.user}`, logId)
+    //         }
+            
+    //         // If the log has feedback, remove from feedback_logs
+    //         if (log && typeof log === 'object' && log.calculation && 
+    //             typeof log.calculation === 'object' && log.calculation.feedback) {
+    //             await this.kv.zrem(`feedback_logs:${log.calculation.feedback}`, logId)
+                
+    //             // If it also has comments, remove from comments_logs
+    //             if (log.calculation.comments) {
+    //                 await this.kv.zrem(`comments_logs:${log.calculation.feedback}`, logId)
+    //             }
+    //         }
+            
+    //         return response.status(200).json({
+    //             success: true,
+    //             message: 'Log deleted successfully'
+    //         })
+    //     } catch (error) {
+    //         console.error('Error deleting log:', error)
+    //         return response.status(500).json({
+    //             success: false,
+    //             message: 'Failed to delete log',
+    //             error: error.message
+    //         })
+    //     }
+    // }
 }
