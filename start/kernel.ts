@@ -50,5 +50,6 @@ router.use([
 export const middleware = router.named({
   guest: () => import('#middleware/guest_middleware'),
   auth: () => import('#middleware/auth_middleware'),
-  supabaseAuth: () => import('#middleware/supabase_auth_middleware')
+  supabaseAuth: () => import('#middleware/supabase_auth_middleware'),
+  apiAuth: () => import('#middleware/api_auth_middleware')
 })

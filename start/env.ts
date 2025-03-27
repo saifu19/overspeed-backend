@@ -36,6 +36,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string(),
 
+  DOMAIN_NAME: Env.schema.string(),
+
   SERPAPI_API_KEY: Env.schema.string(),
   OPENAI_API_KEY: Env.schema.string(),
 

@@ -11,6 +11,7 @@ import AgentsController from '#controllers/langgraph/agents_controller'
 import MagicLinkController from '#controllers/auth/magic_links_controller'
 import LogsController from '#controllers/logs_controller'
 import DatabaseController from '#controllers/database_controller'
+
 router.group(() => {
     router.post('/login', [LoginController, 'handle']).as('api.login')
     router.post('/register', [RegisterController, 'handle']).as('api.register')
@@ -67,5 +68,5 @@ router.group(() => {
     router.get('/database/sizes', [DatabaseController, 'getUniqueSizes'])
     router.get('/database/rpm-limit', [DatabaseController, 'getUpperRPMLimitAndDiameter'])
 })
-.use(middleware.supabaseAuth())
+.use(middleware.apiAuth())
 .prefix('/api')
