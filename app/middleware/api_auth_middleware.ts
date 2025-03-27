@@ -4,13 +4,12 @@ import axios from 'axios'
 import env from '#start/env'
 
 interface ApiUser {
-  id: number
+  id: string
   name: string
   email: string
   role: string
   created_at: string
   updated_at: string
-  // ... add other fields as needed
 }
 
 export default class ApiAuthMiddleware {
