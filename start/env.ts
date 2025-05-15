@@ -48,4 +48,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   // Vercel KV Configuration
   KV_REST_API_URL: Env.schema.string(),
   KV_REST_API_TOKEN: Env.schema.string(),
+
+  PROJECTWE_CLIENT_ID: Env.schema.string(),
+  PROJECTWE_CLIENT_SECRET: Env.schema.string(),
 })

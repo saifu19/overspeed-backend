@@ -11,41 +11,72 @@ export default class LoginController {
 
 			let config = {
 				method: 'POST',
-				url: `https://${env.get('DOMAIN_NAME')}/api/login/user`,
+				url: `https://${env.get('DOMAIN_NAME')}/oauth/token`,
 				headers: {
 					'Content-Type': 'application/json',
 					'Accept': 'application/json',
 				},
 				data: {
-					email: email,
-					password: password
+					grant_type: 'password',
+					client_id: env.get('PROJECTWE_CLIENT_ID'),
+					client_secret: env.get('PROJECTWE_CLIENT_SECRET'),
+					username: email,
+					password: password,
+					scope: '*'
 				}
 			}
+
+			console.log(config)
 
 
 			try {
 				const result = await axios(config)
+				console.log(result.data)
+				console.log(result.status)
+
+				if (result.status !== 200) {
+					console.log(result.data)
+					return response.status(result.status).json({
+						status: 'error',
+						message: result.data.message
+					})
+				}
+
+				const user = await axios.get(`https://${env.get('DOMAIN_NAME')}/api/stateful/user`, {
+					headers: {
+						'Authorization': `Bearer ${result.data.access_token}`
+					}
+				})
+
+				console.log(user.status)
+
+				if (user.status !== 200) {
+					console.log(user.data)
+					return response.status(user.status).json({
+						status: 'error',
+						message: user.data.message
+					})
+				}
 
 				return response.json({
 					status: 'success',
 					data: {
 						user: {
-							id: result.data.user.id,
-							email: result.data.user.email,
+							id: user.data.id,
+							email: user.data.email,
 						},
-						token: result.data.token
+						token: result.data.access_token
 					}
 				})
 			} catch (axiosError) {
 				const status = axiosError.response?.status || 500
 				const message = axiosError.response?.data?.message || 'Invalid credentials'
-				
 				return response.status(status).json({
 					status: 'error',
 					message: message
 				})
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Validation error:', error)
 			return response.status(401).json({
 				status: 'error',
