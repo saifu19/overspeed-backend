@@ -67,6 +67,10 @@ router.group(() => {
     router.get('/database/models', [DatabaseController, 'getUniqueModels'])
     router.get('/database/sizes', [DatabaseController, 'getUniqueSizes'])
     router.get('/database/rpm-limit', [DatabaseController, 'getUpperRPMLimitAndDiameter'])
+
+    router.get('/ping', (ctx) => {
+        return ctx.response.json({ message: 'pong' })
+    })
     
 })
 .use(middleware.apiAuth())
