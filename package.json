@@ -64,7 +64,7 @@
     "@langchain/community": "^0.3.15",
     "@langchain/langgraph": "^0.2.33",
     "@supabase/gotrue-js": "^2.67.3",
-    "@supabase/supabase-js": "^2.47.12",
+    "@supabase/supabase-js": "^2.52.0",
     "@vercel/kv": "^0.2.4",
     "@vinejs/vine": "^2.1.0",
     "edge.js": "^6.0.2",
